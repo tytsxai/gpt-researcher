@@ -50,8 +50,8 @@ class DeepResearch:
     async def generate_feedback(self, query: str, num_questions: int = 3) -> List[str]:
         """Generate follow-up questions to clarify research direction"""
         messages = [
-            {"role": "system", "content": "You are an expert researcher helping to clarify research directions."},
-            {"role": "user", "content": f"Given the following query from the user, ask some follow up questions to clarify the research direction. Return a maximum of {num_questions} questions, but feel free to return less if the original query is clear. Format each question on a new line starting with 'Question: ': {query}"}
+            {"role": "system", "content": "你是一位专业的研究员，帮助明确研究方向。"},
+            {"role": "user", "content": f"根据用户的以下查询，提出一些后续问题以明确研究方向。最多返回 {num_questions} 个问题，但如果原始查询已经很清楚，可以返回更少的问题。每个问题单独一行，以 'Question: ' 开头：{query}"}
         ]
 
         response = await create_chat_completion(

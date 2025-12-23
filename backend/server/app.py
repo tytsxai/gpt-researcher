@@ -84,10 +84,10 @@ async def lifespan(app: FastAPI):
     else:
         logger.warning(f"Frontend directory not found: {frontend_path}")
     
-    logger.info("GPT Researcher API ready - local mode (no database persistence)")
+    logger.info("GPT Researcher API 已就绪 - 本地模式（无数据库持久化）")
     yield
     # Shutdown
-    logger.info("Research API shutting down")
+    logger.info("研究 API 正在关闭")
 
 # App initialization
 app = FastAPI(lifespan=lifespan)
@@ -152,7 +152,7 @@ async def serve_frontend():
 async def read_report(request: Request, research_id: str):
     docx_path = os.path.join('outputs', f"{research_id}.docx")
     if not os.path.exists(docx_path):
-        return {"message": "Report not found."}
+        return {"message": "未找到报告。"}
     return FileResponse(docx_path)
 
 
@@ -160,15 +160,15 @@ async def read_report(request: Request, research_id: str):
 @app.get("/api/reports")
 async def get_all_reports(report_ids: str = None):
     """Get research reports - returns empty list since no database."""
-    logger.debug("No database configured - returning empty reports list")
+    logger.debug("未配置数据库 - 返回空报告列表")
     return {"reports": []}
 
 
 @app.get("/api/reports/{research_id}")
 async def get_report_by_id(research_id: str):
     """Get a specific research report by ID - no database configured."""
-    logger.debug(f"No database configured - cannot retrieve report {research_id}")
-    raise HTTPException(status_code=404, detail="Report not found")
+    logger.debug(f"未配置数据库 - 无法检索报告 {research_id}")
+    raise HTTPException(status_code=404, detail="未找到报告")
 
 
 @app.post("/api/reports")
@@ -177,10 +177,10 @@ async def create_or_update_report(request: Request):
     try:
         data = await request.json()
         research_id = data.get("id", "temp_id")
-        logger.debug(f"Report creation requested for ID: {research_id} - no database configured, not persisted")
+        logger.debug(f"请求创建报告 ID: {research_id} - 未配置数据库，未持久化")
         return {"success": True, "id": research_id}
     except Exception as e:
-        logger.error(f"Error processing report creation: {e}")
+        logger.error(f"处理报告创建时出错: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -228,7 +228,7 @@ async def generate_report(research_request: ResearchRequest, background_tasks: B
 
     if research_request.generate_in_background:
         background_tasks.add_task(write_report, research_request=research_request, research_id=research_id)
-        return {"message": "Your report is being generated in the background. Please check back later.",
+        return {"message": "您的报告正在后台生成中，请稍后查看。",
                 "research_id": research_id}
     else:
         response = await write_report(research_request, research_id)

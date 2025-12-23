@@ -51,35 +51,35 @@ class PromptFamily:
         """
         import json
         
-        return f"""You are a research assistant helping to select the most relevant tools for a research query.
+        return f"""你是一个研究助手,负责为研究查询选择最相关的工具。
 
-RESEARCH QUERY: "{query}"
+研究查询: "{query}"
 
-AVAILABLE TOOLS:
+可用工具:
 {json.dumps(tools_info, indent=2)}
 
-TASK: Analyze the tools and select EXACTLY {max_tools} tools that are most relevant for researching the given query.
+任务: 分析这些工具并选择恰好 {max_tools} 个与给定查询最相关的工具。
 
-SELECTION CRITERIA:
-- Choose tools that can provide information, data, or insights related to the query
-- Prioritize tools that can search, retrieve, or access relevant content
-- Consider tools that complement each other (e.g., different data sources)
-- Exclude tools that are clearly unrelated to the research topic
+选择标准:
+- 选择能够提供与查询相关的信息、数据或见解的工具
+- 优先选择能够搜索、检索或访问相关内容的工具
+- 考虑相互补充的工具(例如,不同的数据源)
+- 排除明显与研究主题无关的工具
 
-Return a JSON object with this exact format:
+返回以下格式的 JSON 对象:
 {{
   "selected_tools": [
     {{
       "index": 0,
       "name": "tool_name",
       "relevance_score": 9,
-      "reason": "Detailed explanation of why this tool is relevant"
+      "reason": "详细解释为什么这个工具相关"
     }}
   ],
-  "selection_reasoning": "Overall explanation of the selection strategy"
+  "selection_reasoning": "选择策略的整体说明"
 }}
 
-Select exactly {max_tools} tools, ranked by relevance to the research query.
+选择恰好 {max_tools} 个工具,按与研究查询的相关性排序。
 """
 
     @staticmethod
@@ -102,20 +102,20 @@ Select exactly {max_tools} tools, ranked by relevance to the research query.
             else:
                 tool_names.append(str(tool))
         
-        return f"""You are a research assistant with access to specialized tools. Your task is to research the following query and provide comprehensive, accurate information.
+        return f"""你是一个拥有专业工具访问权限的研究助手。你的任务是研究以下查询并提供全面、准确的信息。
 
-RESEARCH QUERY: "{query}"
+研究查询: "{query}"
 
-INSTRUCTIONS:
-1. Use the available tools to gather relevant information about the query
-2. Call multiple tools if needed to get comprehensive coverage
-3. If a tool call fails or returns empty results, try alternative approaches
-4. Synthesize information from multiple sources when possible
-5. Focus on factual, relevant information that directly addresses the query
+指令:
+1. 使用可用工具收集有关查询的相关信息
+2. 如需全面覆盖,可调用多个工具
+3. 如果工具调用失败或返回空结果,请尝试其他方法
+4. 尽可能综合来自多个来源的信息
+5. 专注于直接解决查询的事实性相关信息
 
-AVAILABLE TOOLS: {tool_names}
+可用工具: {tool_names}
 
-Please conduct thorough research and provide your findings. Use the tools strategically to gather the most relevant and comprehensive information."""
+请进行彻底的研究并提供你的发现。战略性地使用工具来收集最相关和最全面的信息。"""
 
     @staticmethod
     def generate_search_queries_prompt(
@@ -145,21 +145,21 @@ Please conduct thorough research and provide your findings. Use the tools strate
             task = question
 
         context_prompt = f"""
-You are a seasoned research assistant tasked with generating search queries to find relevant information for the following task: "{task}".
-Context: {context}
+你是一位经验丰富的研究助手,负责生成搜索查询以查找以下任务的相关信息: "{task}"。
+上下文: {context}
 
-Use this context to inform and refine your search queries. The context provides real-time web information that can help you generate more specific and relevant queries. Consider any current events, recent developments, or specific details mentioned in the context that could enhance the search queries.
+使用此上下文来指导和优化你的搜索查询。上下文提供了实时网络信息,可以帮助你生成更具体和相关的查询。考虑上下文中提到的任何当前事件、最新发展或具体细节,这些可以增强搜索查询。
 """ if context else ""
 
         dynamic_example = ", ".join([f'"query {i+1}"' for i in range(max_iterations)])
 
-        return f"""Write {max_iterations} google search queries to search online that form an objective opinion from the following task: "{task}"
+        return f"""编写 {max_iterations} 个谷歌搜索查询以在线搜索,从以下任务中形成客观意见: "{task}"
 
-Assume the current date is {datetime.now(timezone.utc).strftime('%B %d, %Y')} if required.
+如果需要,假设当前日期是 {datetime.now(timezone.utc).strftime('%B %d, %Y')}。
 
 {context_prompt}
-You must respond with a list of strings in the following format: [{dynamic_example}].
-The response should contain ONLY the list.
+你必须以以下格式的字符串列表响应: [{dynamic_example}]。
+响应应该只包含列表。
 """
 
     @staticmethod
@@ -181,77 +181,77 @@ The response should contain ONLY the list.
         reference_prompt = ""
         if report_source == ReportSource.Web.value:
             reference_prompt = f"""
-You MUST write all used source urls at the end of the report as references, and make sure to not add duplicated sources, but only one reference for each.
-Every url should be hyperlinked: [url website](url)
-Additionally, you MUST include hyperlinks to the relevant URLs wherever they are referenced in the report:
+你必须在报告末尾将所有使用的来源网址作为参考文献列出,并确保不添加重复的来源,每个来源只引用一次。
+每个网址都应该是超链接: [url website](url)
+此外,你必须在报告中引用相关网址的地方包含超链接:
 
-eg: Author, A. A. (Year, Month Date). Title of web page. Website Name. [url website](url)
+例如: Author, A. A. (Year, Month Date). Title of web page. Website Name. [url website](url)
 """
         else:
             reference_prompt = f"""
-You MUST write all used source document names at the end of the report as references, and make sure to not add duplicated sources, but only one reference for each."
+你必须在报告末尾将所有使用的来源文档名称作为参考文献列出,并确保不添加重复的来源,每个来源只引用一次。"
 """
 
-        tone_prompt = f"Write the report in a {tone.value} tone." if tone else ""
+        tone_prompt = f"以{tone.value}的语气撰写报告。" if tone else ""
 
         return f"""
-Information: "{context}"
+信息: "{context}"
 ---
-Using the above information, answer the following query or task: "{question}" in a detailed report --
-The report should focus on the answer to the query, should be well structured, informative,
-in-depth, and comprehensive, with facts and numbers if available and at least {total_words} words.
-You should strive to write the report as long as you can using all relevant and necessary information provided.
+使用以上信息,以详细报告的形式回答以下查询或任务: "{question}" --
+报告应专注于回答查询,应结构良好、信息丰富、
+深入且全面,如果可用,应包含事实和数字,至少 {total_words} 字。
+你应该努力使用所有提供的相关和必要信息,尽可能详细地撰写报告。
 
-Please follow all of the following guidelines in your report:
-- You MUST determine your own concrete and valid opinion based on the given information. Do NOT defer to general and meaningless conclusions.
-- You MUST write the report with markdown syntax and {report_format} format.
-- Structure your report with clear markdown headers: use # for the main title, ## for major sections, and ### for subsections.
-- Use markdown tables when presenting structured data or comparisons to enhance readability.
-- You MUST prioritize the relevance, reliability, and significance of the sources you use. Choose trusted sources over less reliable ones.
-- You must also prioritize new articles over older articles if the source can be trusted.
-- You MUST NOT include a table of contents, but DO include proper markdown headers (# ## ###) to structure your report clearly.
-- Use in-text citation references in {report_format} format and make it with markdown hyperlink placed at the end of the sentence or paragraph that references them like this: ([in-text citation](url)).
-- Don't forget to add a reference list at the end of the report in {report_format} format and full url links without hyperlinks.
+请在报告中遵循以下所有准则:
+- 你必须根据给定的信息确定自己具体且有效的观点。不要推迟到一般和无意义的结论。
+- 你必须使用 markdown 语法和 {report_format} 格式撰写报告。
+- 使用清晰的 markdown 标题构建报告: 使用 # 作为主标题,## 作为主要部分,### 作为子部分。
+- 在呈现结构化数据或比较时使用 markdown 表格以增强可读性。
+- 你必须优先考虑所使用来源的相关性、可靠性和重要性。选择可信来源而不是不太可靠的来源。
+- 如果来源可信,你还必须优先考虑新文章而不是旧文章。
+- 你不得包含目录,但必须包含适当的 markdown 标题 (# ## ###) 以清晰地构建报告。
+- 使用 {report_format} 格式的文内引用参考,并在引用它们的句子或段落末尾使用 markdown 超链接,如下所示: ([in-text citation](url))。
+- 不要忘记在报告末尾以 {report_format} 格式添加参考文献列表和完整的网址链接(不带超链接)。
 - {reference_prompt}
 - {tone_prompt}
 
-You MUST write the report in the following language: {language}.
-Please do your best, this is very important to my career.
-Assume that the current date is {date.today()}.
+你必须使用以下语言撰写报告: {language}。
+请尽力而为,这对我的职业生涯非常重要。
+假设当前日期是 {date.today()}。
 """
 
     @staticmethod
     def curate_sources(query, sources, max_results=10):
-        return f"""Your goal is to evaluate and curate the provided scraped content for the research task: "{query}"
-    while prioritizing the inclusion of relevant and high-quality information, especially sources containing statistics, numbers, or concrete data.
+        return f"""你的目标是评估和筛选为研究任务提供的抓取内容: "{query}"
+    同时优先包含相关和高质量的信息,特别是包含统计数据、数字或具体数据的来源。
 
-The final curated list will be used as context for creating a research report, so prioritize:
-- Retaining as much original information as possible, with extra emphasis on sources featuring quantitative data or unique insights
-- Including a wide range of perspectives and insights
-- Filtering out only clearly irrelevant or unusable content
+最终筛选的列表将用作创建研究报告的上下文,因此请优先考虑:
+- 尽可能保留原始信息,特别强调包含定量数据或独特见解的来源
+- 包含广泛的观点和见解
+- 仅过滤明显不相关或不可用的内容
 
-EVALUATION GUIDELINES:
-1. Assess each source based on:
-   - Relevance: Include sources directly or partially connected to the research query. Err on the side of inclusion.
-   - Credibility: Favor authoritative sources but retain others unless clearly untrustworthy.
-   - Currency: Prefer recent information unless older data is essential or valuable.
-   - Objectivity: Retain sources with bias if they provide a unique or complementary perspective.
-   - Quantitative Value: Give higher priority to sources with statistics, numbers, or other concrete data.
-2. Source Selection:
-   - Include as many relevant sources as possible, up to {max_results}, focusing on broad coverage and diversity.
-   - Prioritize sources with statistics, numerical data, or verifiable facts.
-   - Overlapping content is acceptable if it adds depth, especially when data is involved.
-   - Exclude sources only if they are entirely irrelevant, severely outdated, or unusable due to poor content quality.
-3. Content Retention:
-   - DO NOT rewrite, summarize, or condense any source content.
-   - Retain all usable information, cleaning up only clear garbage or formatting issues.
-   - Keep marginally relevant or incomplete sources if they contain valuable data or insights.
+评估准则:
+1. 根据以下标准评估每个来源:
+   - 相关性: 包含与研究查询直接或部分相关的来源。倾向于包含。
+   - 可信度: 偏好权威来源,但保留其他来源,除非明显不可信。
+   - 时效性: 偏好最新信息,除非旧数据是必要的或有价值的。
+   - 客观性: 如果有偏见的来源提供独特或互补的观点,则保留它们。
+   - 定量价值: 对包含统计数据、数字或其他具体数据的来源给予更高优先级。
+2. 来源选择:
+   - 尽可能包含更多相关来源,最多 {max_results} 个,专注于广泛覆盖和多样性。
+   - 优先考虑包含统计数据、数值数据或可验证事实的来源。
+   - 如果重叠内容增加深度,特别是涉及数据时,重叠内容是可以接受的。
+   - 仅在来源完全不相关、严重过时或由于内容质量差而无法使用时才排除来源。
+3. 内容保留:
+   - 不要重写、总结或压缩任何来源内容。
+   - 保留所有可用信息,仅清理明显的垃圾或格式问题。
+   - 如果边缘相关或不完整的来源包含有价值的数据或见解,则保留它们。
 
-SOURCES LIST TO EVALUATE:
+要评估的来源列表:
 {sources}
 
-You MUST return your response in the EXACT sources JSON list format as the original sources.
-The response MUST not contain any markdown format or additional text (like ```json), just the JSON list!
+你必须以与原始来源完全相同的来源 JSON 列表格式返回响应。
+响应不得包含任何 markdown 格式或附加文本(如 ```json),只需 JSON 列表!
 """
 
     @staticmethod
@@ -271,26 +271,26 @@ The response MUST not contain any markdown format or additional text (like ```js
         reference_prompt = ""
         if report_source == ReportSource.Web.value:
             reference_prompt = f"""
-            You MUST include all relevant source urls.
-            Every url should be hyperlinked: [url website](url)
+            你必须包含所有相关的来源网址。
+            每个网址都应该是超链接: [url website](url)
             """
         else:
             reference_prompt = f"""
-            You MUST write all used source document names at the end of the report as references, and make sure to not add duplicated sources, but only one reference for each."
+            你必须在报告末尾将所有使用的来源文档名称作为参考文献列出,并确保不添加重复的来源,每个来源只引用一次。"
         """
 
         return (
-            f'"""{context}"""\n\nBased on the above information, generate a bibliography recommendation report for the following'
-            f' question or topic: "{question}". The report should provide a detailed analysis of each recommended resource,'
-            " explaining how each source can contribute to finding answers to the research question.\n"
-            "Focus on the relevance, reliability, and significance of each source.\n"
-            "Ensure that the report is well-structured, informative, in-depth, and follows Markdown syntax.\n"
-            "Use markdown tables and other formatting features when appropriate to organize and present information clearly.\n"
-            "Include relevant facts, figures, and numbers whenever available.\n"
-            f"The report should have a minimum length of {total_words} words.\n"
-            f"You MUST write the report in the following language: {language}.\n"
-            "You MUST include all relevant source urls."
-            "Every url should be hyperlinked: [url website](url)"
+            f'"""{context}"""\n\n基于以上信息,为以下问题或主题生成参考文献推荐报告: "{question}"。'
+            f'报告应提供对每个推荐资源的详细分析,'
+            "解释每个来源如何有助于找到研究问题的答案。\n"
+            "专注于每个来源的相关性、可靠性和重要性。\n"
+            "确保报告结构良好、信息丰富、深入,并遵循 Markdown 语法。\n"
+            "在适当的时候使用 markdown 表格和其他格式功能来清晰地组织和呈现信息。\n"
+            "尽可能包含相关的事实、数据和数字。\n"
+            f"报告应至少有 {total_words} 字。\n"
+            f"你必须使用以下语言撰写报告: {language}。\n"
+            "你必须包含所有相关的来源网址。"
+            "每个网址都应该是超链接: [url website](url)"
             f"{reference_prompt}"
         )
 
@@ -311,12 +311,12 @@ The response MUST not contain any markdown format or additional text (like ```js
         """
 
         return (
-            f'"""{context}""" Using the above information, generate an outline for a research report in Markdown syntax'
-            f' for the following question or topic: "{question}". The outline should provide a well-structured framework'
-            " for the research report, including the main sections, subsections, and key points to be covered."
-            f" The research report should be detailed, informative, in-depth, and a minimum of {total_words} words."
-            " Use appropriate Markdown syntax to format the outline and ensure readability."
-            " Consider using markdown tables and other formatting features where they would enhance the presentation of information."
+            f'"""{context}""" 使用以上信息,为以下问题或主题生成 Markdown 语法的研究报告大纲'
+            f': "{question}"。大纲应为研究报告提供结构良好的框架'
+            ",包括主要部分、子部分和要涵盖的关键点。"
+            f"研究报告应详细、信息丰富、深入,至少 {total_words} 字。"
+            "使用适当的 Markdown 语法来格式化大纲并确保可读性。"
+            "考虑在适当的地方使用 markdown 表格和其他格式功能来增强信息的呈现。"
         )
 
     @staticmethod
@@ -344,18 +344,18 @@ The response MUST not contain any markdown format or additional text (like ```js
         reference_prompt = ""
         if report_source == ReportSource.Web.value:
             reference_prompt = f"""
-You MUST write all used source urls at the end of the report as references, and make sure to not add duplicated sources, but only one reference for each.
-Every url should be hyperlinked: [url website](url)
-Additionally, you MUST include hyperlinks to the relevant URLs wherever they are referenced in the report:
+你必须在报告末尾将所有使用的来源网址作为参考文献列出,并确保不添加重复的来源,每个来源只引用一次。
+每个网址都应该是超链接: [url website](url)
+此外,你必须在报告中引用相关网址的地方包含超链接:
 
-eg: Author, A. A. (Year, Month Date). Title of web page. Website Name. [url website](url)
+例如: Author, A. A. (Year, Month Date). Title of web page. Website Name. [url website](url)
 """
         else:
             reference_prompt = f"""
-You MUST write all used source document names at the end of the report as references, and make sure to not add duplicated sources, but only one reference for each."
+你必须在报告末尾将所有使用的来源文档名称作为参考文献列出,并确保不添加重复的来源,每个来源只引用一次。"
 """
 
-        tone_prompt = f"Write the report in a {tone.value} tone." if tone else ""
+        tone_prompt = f"以{tone.value}的语气撰写报告。" if tone else ""
 
         return f"""
 Using the following hierarchically researched information and citations:

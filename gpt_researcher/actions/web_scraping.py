@@ -13,13 +13,13 @@ async def scrape_urls(
     urls, cfg: Config, worker_pool: WorkerPool
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     """
-    Scrapes the urls
-    Args:
-        urls: List of urls
-        cfg: Config (optional)
+    抓取这些 URL
+    参数:
+        urls: URL 列表
+        cfg: 配置（可选）
 
-    Returns:
-        tuple[list[dict[str, Any]], list[dict[str, Any]]]: tuple containing scraped content and images
+    返回:
+        tuple[list[dict[str, Any]], list[dict[str, Any]]]: 包含抓取内容和图片的元组
 
     """
     scraped_data = []
@@ -37,55 +37,55 @@ async def scrape_urls(
             if 'image_urls' in item:
                 images.extend(item['image_urls'])
     except Exception as e:
-        print(f"{Fore.RED}Error in scrape_urls: {e}{Style.RESET_ALL}")
+        print(f"{Fore.RED}抓取 URL 时出错: {e}{Style.RESET_ALL}")
 
     return scraped_data, images
 
 
 async def filter_urls(urls: list[str], config: Config) -> list[str]:
     """
-    Filter URLs based on configuration settings.
+    根据配置设置过滤 URL。
 
-    Args:
-        urls (list[str]): List of URLs to filter.
-        config (Config): Configuration object.
+    参数:
+        urls (list[str]): 要过滤的 URL 列表。
+        config (Config): 配置对象。
 
-    Returns:
-        list[str]: Filtered list of URLs.
+    返回:
+        list[str]: 过滤后的 URL 列表。
     """
     filtered_urls = []
     for url in urls:
-        # Add your filtering logic here
-        # For example, you might want to exclude certain domains or URL patterns
+        # 在这里添加过滤逻辑
+        # 例如，你可能想排除特定域名或 URL 模式
         if not any(excluded in url for excluded in config.excluded_domains):
             filtered_urls.append(url)
     return filtered_urls
 
 async def extract_main_content(html_content: str) -> str:
     """
-    Extract the main content from HTML.
+    从 HTML 中提取主要内容。
 
-    Args:
-        html_content (str): Raw HTML content.
+    参数:
+        html_content (str): 原始 HTML 内容。
 
-    Returns:
-        str: Extracted main content.
+    返回:
+        str: 提取的主要内容。
     """
-    # Implement content extraction logic here
-    # This could involve using libraries like BeautifulSoup or custom parsing logic
-    # For now, we'll just return the raw HTML as a placeholder
+    # 在这里实现内容提取逻辑
+    # 这可能涉及使用 BeautifulSoup 等库或自定义解析逻辑
+    # 目前先返回原始 HTML 作为占位
     return html_content
 
 async def process_scraped_data(scraped_data: list[dict[str, Any]], config: Config) -> list[dict[str, Any]]:
     """
-    Process the scraped data to extract and clean the main content.
+    处理抓取数据以提取并清理主要内容。
 
-    Args:
-        scraped_data (list[dict[str, Any]]): List of dictionaries containing scraped data.
-        config (Config): Configuration object.
+    参数:
+        scraped_data (list[dict[str, Any]]): 包含抓取数据的字典列表。
+        config (Config): 配置对象。
 
-    Returns:
-        list[dict[str, Any]]: Processed scraped data.
+    返回:
+        list[dict[str, Any]]: 处理后的抓取数据。
     """
     processed_data = []
     for item in scraped_data:

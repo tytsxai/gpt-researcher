@@ -36,13 +36,13 @@ def get_tools():
             "type": "function",
             "function": {
                 "name": "quick_search",
-                "description": "Search for current events or online information when you need new knowledge that doesn't exist in the current context",
+                "description": "当你需要搜索当前事件或在线信息，而这些信息在当前上下文中不存在时使用",
                 "parameters": {
                     "type": "object",
                     "properties": {
                         "query": {
                             "type": "string",
-                            "description": "The search query"
+                            "description": "搜索查询"
                         }
                     },
                     "required": ["query"]
@@ -109,7 +109,7 @@ class ChatAgentWithMemory:
     def quick_search(self, query):
         """Perform a web search for current information using Tavily"""
         try:
-            logger.info(f"Performing web search for: {query}")
+            logger.info(f"正在执行网络搜索: {query}")
             results = self.tavily_client.search(query=query, max_results=5)
             
             # Store search metadata for frontend
@@ -125,7 +125,7 @@ class ChatAgentWithMemory:
             
             return results
         except Exception as e:
-            logger.error(f"Error performing web search: {str(e)}", exc_info=True)
+            logger.error(f"执行网络搜索时出错: {str(e)}", exc_info=True)
             return {
                 "error": str(e),
                 "results": []
@@ -216,23 +216,23 @@ class ChatAgentWithMemory:
                         "content": msg["content"]
                     })
                 else:
-                    logger.warning(f"Skipping message with missing role or content: {msg}")
+                    logger.warning(f"跳过缺少角色或内容的消息: {msg}")
             
             # Process the chat using configured LLM provider
             ai_message, tool_calls_metadata = await self.process_chat_completion(formatted_messages)
             
             # Provide fallback response if message is empty
             if not ai_message:
-                logger.warning("No AI message content found in response, using fallback message")
-                ai_message = "I apologize, but I couldn't generate a proper response. Please try asking your question again."
+                logger.warning("响应中未找到 AI 消息内容，使用备用消息")
+                ai_message = "抱歉，我无法生成正确的响应。请尝试重新提问。"
             
-            logger.info(f"Generated response: {ai_message[:100]}..." if len(ai_message) > 100 else f"Generated response: {ai_message}")
+            logger.info(f"生成的响应: {ai_message[:100]}..." if len(ai_message) > 100 else f"生成的响应: {ai_message}")
             
             # Return both the message and any metadata about tools used
             return ai_message, tool_calls_metadata
             
         except Exception as e:
-            logger.error(f"Error in chat: {str(e)}", exc_info=True)
+            logger.error(f"聊天过程中出错: {str(e)}", exc_info=True)
             raise
 
     def get_context(self):

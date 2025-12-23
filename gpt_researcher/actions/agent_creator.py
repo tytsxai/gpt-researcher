@@ -17,18 +17,18 @@ async def choose_agent(
     **kwargs
 ):
     """
-    Chooses the agent automatically
-    Args:
-        parent_query: In some cases the research is conducted on a subtopic from the main query.
-            The parent query allows the agent to know the main context for better reasoning.
-        query: original query
-        cfg: Config
-        cost_callback: callback for calculating llm costs
-        prompt_family: Family of prompts
+    自动选择代理
+    参数:
+        parent_query: 在某些情况下，研究会针对主查询的子主题进行。
+            parent_query 让代理了解主要上下文以便更好推理。
+        query: 原始查询
+        cfg: 配置
+        cost_callback: 计算 LLM 成本的回调
+        prompt_family: 提示词家族
 
-    Returns:
-        agent: Agent name
-        agent_role_prompt: Agent role prompt
+    返回:
+        agent: 代理名称
+        agent_role_prompt: 代理角色提示词
     """
     query = f"{parent_query} - {query}" if parent_query else f"{query}"
     response = None  # Initialize response to ensure it's defined
@@ -38,7 +38,7 @@ async def choose_agent(
             model=cfg.smart_llm_model,
             messages=[
                 {"role": "system", "content": f"{prompt_family.auto_agent_instructions()}"},
-                {"role": "user", "content": f"task: {query}"},
+                {"role": "user", "content": f"任务: {query}"},
             ],
             temperature=0.15,
             llm_provider=cfg.smart_llm_provider,
@@ -63,11 +63,11 @@ async def handle_json_error(response):
         error_type = type(e).__name__
         error_msg = str(e)
         logger.warning(
-            f"Failed to parse agent JSON with json_repair: {error_type}: {error_msg}",
+            f"使用 json_repair 解析代理 JSON 失败: {error_type}: {error_msg}",
             exc_info=True
         )
         if response:
-            logger.debug(f"LLM response that failed to parse: {response[:500]}...")
+            logger.debug(f"无法解析的 LLM 响应: {response[:500]}...")
 
     json_string = extract_json_with_regex(response)
     if json_string:
@@ -76,14 +76,14 @@ async def handle_json_error(response):
             return json_data["server"], json_data["agent_role_prompt"]
         except json.JSONDecodeError as e:
             logger.warning(
-                f"Failed to decode JSON from regex extraction: {str(e)}",
+                f"从正则提取中解码 JSON 失败: {str(e)}",
                 exc_info=True
             )
 
-    logger.info("No valid JSON found in LLM response. Falling back to default agent.")
-    return "Default Agent", (
-        "You are an AI critical thinker research assistant. Your sole purpose is to write well written, "
-        "critically acclaimed, objective and structured reports on given text."
+    logger.info("在 LLM 响应中未找到有效 JSON。回退到默认代理。")
+    return "默认代理", (
+        "你是一名具备批判性思维的人工智能研究助理。你的唯一目的就是基于给定文本撰写写作精良、"
+        "广受好评、客观且结构化的报告。"
     )
 
 

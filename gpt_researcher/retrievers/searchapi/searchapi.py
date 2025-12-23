@@ -1,6 +1,6 @@
-# SearchApi Retriever
+# SearchApi 检索器
 
-# libraries
+# 依赖库
 import os
 import requests
 import urllib.parse
@@ -8,11 +8,11 @@ import urllib.parse
 
 class SearchApiSearch():
     """
-    SearchApi Retriever
+    SearchApi 检索器
     """
     def __init__(self, query, query_domains=None):
         """
-        Initializes the SearchApiSearch object
+        初始化 SearchApiSearch 对象
         Args:
             query:
         """
@@ -21,25 +21,25 @@ class SearchApiSearch():
 
     def get_api_key(self):
         """
-        Gets the SearchApi API key
+        获取 SearchApi API 密钥
         Returns:
 
         """
         try:
             api_key = os.environ["SEARCHAPI_API_KEY"]
         except:
-            raise Exception("SearchApi key not found. Please set the SEARCHAPI_API_KEY environment variable. "
-                            "You can get a key at https://www.searchapi.io/")
+            raise Exception("未找到 SearchApi 密钥。请设置 SEARCHAPI_API_KEY 环境变量。"
+                            "可在 https://www.searchapi.io/ 获取密钥。")
         return api_key
 
     def search(self, max_results=7):
         """
-        Searches the query
+        搜索查询
         Returns:
 
         """
-        print("SearchApiSearch: Searching with query {0}...".format(self.query))
-        """Useful for general internet search queries using SearchApi."""
+        print("SearchApiSearch：正在使用查询 {0} 进行搜索...".format(self.query))
+        """使用 SearchApi 进行通用互联网搜索查询。"""
 
 
         url = "https://www.searchapi.io/api/v1/search"
@@ -65,7 +65,7 @@ class SearchApiSearch():
                     results = search_results["organic_results"]
                     results_processed = 0
                     for result in results:
-                        # skip youtube results
+                        # 跳过 YouTube 结果
                         if "youtube.com" in result["link"]:
                             continue
                         if results_processed >= max_results:
@@ -78,7 +78,7 @@ class SearchApiSearch():
                         search_response.append(search_result)
                         results_processed += 1
         except Exception as e:
-            print(f"Error: {e}. Failed fetching sources. Resulting in empty response.")
+            print(f"错误：{e}。获取来源失败，返回空结果。")
             search_response = []
 
         return search_response

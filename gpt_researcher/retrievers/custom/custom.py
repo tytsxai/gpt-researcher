@@ -5,20 +5,20 @@ import os
 
 class CustomRetriever:
     """
-    Custom API Retriever
+    自定义 API 检索器
     """
 
     def __init__(self, query: str, query_domains=None):
         self.endpoint = os.getenv('RETRIEVER_ENDPOINT')
         if not self.endpoint:
-            raise ValueError("RETRIEVER_ENDPOINT environment variable not set")
+            raise ValueError("未设置 RETRIEVER_ENDPOINT 环境变量")
 
         self.params = self._populate_params()
         self.query = query
 
     def _populate_params(self) -> Dict[str, Any]:
         """
-        Populates parameters from environment variables prefixed with 'RETRIEVER_ARG_'
+        从以“RETRIEVER_ARG_”开头的环境变量中填充参数
         """
         return {
             key[len('RETRIEVER_ARG_'):].lower(): value
@@ -28,18 +28,18 @@ class CustomRetriever:
 
     def search(self, max_results: int = 5) -> Optional[List[Dict[str, Any]]]:
         """
-        Performs the search using the custom retriever endpoint.
+        使用自定义检索器端点执行搜索。
 
-        :param max_results: Maximum number of results to return (not currently used)
-        :return: JSON response in the format:
+        :param max_results: 返回结果的最大数量（当前未使用）
+        :return: JSON 响应格式如下：
             [
               {
                 "url": "http://example.com/page1",
-                "raw_content": "Content of page 1"
+                "raw_content": "页面 1 的内容"
               },
               {
                 "url": "http://example.com/page2",
-                "raw_content": "Content of page 2"
+                "raw_content": "页面 2 的内容"
               }
             ]
         """
@@ -48,5 +48,5 @@ class CustomRetriever:
             response.raise_for_status()
             return response.json()
         except requests.RequestException as e:
-            print(f"Failed to retrieve search results: {e}")
+            print(f"获取搜索结果失败：{e}")
             return None

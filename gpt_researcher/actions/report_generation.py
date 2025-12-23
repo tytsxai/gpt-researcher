@@ -20,19 +20,19 @@ async def write_report_introduction(
     **kwargs
 ) -> str:
     """
-    Generate an introduction for the report.
+    生成报告引言。
 
-    Args:
-        query (str): The research query.
-        context (str): Context for the report.
-        role (str): The role of the agent.
-        config (Config): Configuration object.
-        websocket: WebSocket connection for streaming output.
-        cost_callback (callable, optional): Callback for calculating LLM costs.
-        prompt_family: Family of prompts
+    参数:
+        query (str): 研究查询。
+        context (str): 报告上下文。
+        role (str): 代理角色。
+        config (Config): 配置对象。
+        websocket: 用于流式输出的 WebSocket 连接。
+        cost_callback (callable, optional): 计算 LLM 成本的回调。
+        prompt_family: 提示词家族
 
-    Returns:
-        str: The generated introduction.
+    返回:
+        str: 生成的引言。
     """
     try:
         introduction = await create_chat_completion(
@@ -56,7 +56,7 @@ async def write_report_introduction(
         )
         return introduction
     except Exception as e:
-        logger.error(f"Error in generating report introduction: {e}")
+        logger.error(f"生成报告引言时出错: {e}")
     return ""
 
 
@@ -71,19 +71,19 @@ async def write_conclusion(
     **kwargs
 ) -> str:
     """
-    Write a conclusion for the report.
+    为报告撰写结论。
 
-    Args:
-        query (str): The research query.
-        context (str): Context for the report.
-        role (str): The role of the agent.
-        config (Config): Configuration object.
-        websocket: WebSocket connection for streaming output.
-        cost_callback (callable, optional): Callback for calculating LLM costs.
-        prompt_family: Family of prompts
+    参数:
+        query (str): 研究查询。
+        context (str): 报告上下文。
+        role (str): 代理角色。
+        config (Config): 配置对象。
+        websocket: 用于流式输出的 WebSocket 连接。
+        cost_callback (callable, optional): 计算 LLM 成本的回调。
+        prompt_family: 提示词家族
 
-    Returns:
-        str: The generated conclusion.
+    返回:
+        str: 生成的结论。
     """
     try:
         conclusion = await create_chat_completion(
@@ -108,7 +108,7 @@ async def write_conclusion(
         )
         return conclusion
     except Exception as e:
-        logger.error(f"Error in writing conclusion: {e}")
+        logger.error(f"撰写结论时出错: {e}")
     return ""
 
 
@@ -122,25 +122,25 @@ async def summarize_url(
     **kwargs
 ) -> str:
     """
-    Summarize the content of a URL.
+    总结 URL 的内容。
 
-    Args:
-        url (str): The URL to summarize.
-        content (str): The content of the URL.
-        role (str): The role of the agent.
-        config (Config): Configuration object.
-        websocket: WebSocket connection for streaming output.
-        cost_callback (callable, optional): Callback for calculating LLM costs.
+    参数:
+        url (str): 要总结的 URL。
+        content (str): URL 的内容。
+        role (str): 代理角色。
+        config (Config): 配置对象。
+        websocket: 用于流式输出的 WebSocket 连接。
+        cost_callback (callable, optional): 计算 LLM 成本的回调。
 
-    Returns:
-        str: The summarized content.
+    返回:
+        str: 总结后的内容。
     """
     try:
         summary = await create_chat_completion(
             model=config.smart_llm_model,
             messages=[
                 {"role": "system", "content": f"{role}"},
-                {"role": "user", "content": f"Summarize the following content from {url}:\n\n{content}"},
+                {"role": "user", "content": f"请总结来自 {url} 的以下内容：\n\n{content}"},
             ],
             temperature=0.25,
             llm_provider=config.smart_llm_provider,
@@ -153,7 +153,7 @@ async def summarize_url(
         )
         return summary
     except Exception as e:
-        logger.error(f"Error in summarizing URL: {e}")
+        logger.error(f"总结 URL 时出错: {e}")
     return ""
 
 
@@ -169,19 +169,19 @@ async def generate_draft_section_titles(
     **kwargs
 ) -> List[str]:
     """
-    Generate draft section titles for the report.
+    为报告生成章节标题草案。
 
-    Args:
-        query (str): The research query.
-        context (str): Context for the report.
-        role (str): The role of the agent.
-        config (Config): Configuration object.
-        websocket: WebSocket connection for streaming output.
-        cost_callback (callable, optional): Callback for calculating LLM costs.
-        prompt_family: Family of prompts
+    参数:
+        query (str): 研究查询。
+        context (str): 报告上下文。
+        role (str): 代理角色。
+        config (Config): 配置对象。
+        websocket: 用于流式输出的 WebSocket 连接。
+        cost_callback (callable, optional): 计算 LLM 成本的回调。
+        prompt_family: 提示词家族
 
-    Returns:
-        List[str]: A list of generated section titles.
+    返回:
+        List[str]: 生成的章节标题列表。
     """
     try:
         section_titles = await create_chat_completion(
@@ -202,7 +202,7 @@ async def generate_draft_section_titles(
         )
         return section_titles.split("\n")
     except Exception as e:
-        logger.error(f"Error in generating draft section titles: {e}")
+        logger.error(f"生成章节标题草案时出错: {e}")
     return []
 
 
@@ -219,14 +219,14 @@ async def generate_report(
     existing_headers: list = [],
     relevant_written_contents: list = [],
     cost_callback: callable = None,
-    custom_prompt: str = "", # This can be any prompt the user chooses with the context
+    custom_prompt: str = "", # 可使用用户结合上下文自定义的任意提示词
     headers=None,
     prompt_family: type[PromptFamily] | PromptFamily = PromptFamily,
     **kwargs
 ):
     """
-    generates the final report
-    Args:
+    生成最终报告
+    参数:
         query:
         context:
         agent_role_prompt:
@@ -238,10 +238,10 @@ async def generate_report(
         existing_headers:
         relevant_written_contents:
         cost_callback:
-        prompt_family: Family of prompts
+        prompt_family: 提示词家族
 
-    Returns:
-        report:
+    返回:
+        report: 报告内容
 
     """
     generate_prompt = get_prompt_by_report_type(report_type, prompt_family)
@@ -250,7 +250,7 @@ async def generate_report(
     if report_type == "subtopic_report":
         content = f"{generate_prompt(query, existing_headers, relevant_written_contents, main_topic, context, report_format=cfg.report_format, tone=tone, total_words=cfg.total_words, language=cfg.language)}"
     elif custom_prompt:
-        content = f"{custom_prompt}\n\nContext: {context}"
+        content = f"{custom_prompt}\n\n上下文: {context}"
     else:
         content = f"{generate_prompt(query, context, report_source, report_format=cfg.report_format, tone=tone, total_words=cfg.total_words, language=cfg.language)}"
     try:
@@ -286,6 +286,6 @@ async def generate_report(
                 **kwargs
             )
         except Exception as e:
-            print(f"Error in generate_report: {e}")
+            print(f"生成报告时出错: {e}")
 
     return report

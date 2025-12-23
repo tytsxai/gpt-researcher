@@ -20,7 +20,7 @@ class TavilyExtract:
             api_key = os.environ["TAVILY_API_KEY"]
         except KeyError:
             raise Exception(
-                "Tavily API key not found. Please set the TAVILY_API_KEY environment variable.")
+                "未找到 Tavily API key。请设置 TAVILY_API_KEY 环境变量。")
         return api_key
 
     def scrape(self) -> tuple:
@@ -58,5 +58,5 @@ class TavilyExtract:
             return content, image_urls, title
 
         except Exception as e:
-            print("Error! : " + str(e))
+            print("错误！: " + str(e))
             return "", [], ""

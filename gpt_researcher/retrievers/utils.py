@@ -7,15 +7,15 @@ logger = logging.getLogger(__name__)
 
 async def stream_output(log_type, step, content, websocket=None, with_data=False, data=None):
     """
-    Stream output to the client.
+    将输出流式发送到客户端。
     
-    Args:
-        log_type (str): The type of log
-        step (str): The step being performed
-        content (str): The content to stream
-        websocket: The websocket to stream to
-        with_data (bool): Whether to include data
-        data: Additional data to include
+    参数:
+        log_type (str): 日志类型
+        step (str): 当前执行的步骤
+        content (str): 要流式发送的内容
+        websocket: 要发送到的 websocket
+        with_data (bool): 是否包含数据
+        data: 要附带的额外数据
     """
     if websocket:
         try:
@@ -33,26 +33,26 @@ async def stream_output(log_type, step, content, websocket=None, with_data=False
                     "content": content
                 })
         except Exception as e:
-            logger.error(f"Error streaming output: {e}")
+            logger.error(f"流式输出错误: {e}")
 
 def check_pkg(pkg: str) -> None:
     """
-    Checks if a package is installed and raises an error if not.
+    检查包是否已安装，未安装则抛出错误。
     
-    Args:
-        pkg (str): The package name
+    参数:
+        pkg (str): 包名
     
-    Raises:
-        ImportError: If the package is not installed
+    抛出:
+        ImportError: 未安装包时抛出
     """
     if not importlib.util.find_spec(pkg):
         pkg_kebab = pkg.replace("_", "-")
         raise ImportError(
-            f"Unable to import {pkg_kebab}. Please install with "
+            f"无法导入 {pkg_kebab}。请使用以下命令安装："
             f"`pip install -U {pkg_kebab}`"
         )
 
-# Valid retrievers for fallback
+# 回退时可用的检索器
 VALID_RETRIEVERS = [
     "tavily",
     "custom",
@@ -73,17 +73,17 @@ VALID_RETRIEVERS = [
 
 def get_all_retriever_names():
     """
-    Get all available retriever names
-    :return: List of all available retriever names
+    获取所有可用的检索器名称
+    :return: 所有可用检索器名称的列表
     :rtype: list
     """
     try:
         current_dir = os.path.dirname(os.path.abspath(__file__))
         
-        # Get all items in the current directory
+        # 获取当前目录下的所有条目
         all_items = os.listdir(current_dir)
         
-        # Filter out only the directories, excluding __pycache__
+        # 仅保留目录，排除 __pycache__
         retrievers = [
             item for item in all_items 
             if os.path.isdir(os.path.join(current_dir, item)) and not item.startswith('__')
@@ -91,5 +91,5 @@ def get_all_retriever_names():
         
         return retrievers
     except Exception as e:
-        logger.error(f"Error getting retrievers: {e}")
+        logger.error(f"获取检索器列表时出错: {e}")
         return VALID_RETRIEVERS

@@ -37,8 +37,8 @@ class BrowserScraper:
 
     def scrape(self) -> tuple:
         if not self.url:
-            print("URL not specified")
-            return "A URL was not specified, cancelling request to browse website.", [], ""
+            print("未指定 URL")
+            return "未指定 URL，已取消浏览网站请求。", [], ""
 
         try:
             self.setup_driver()
@@ -49,10 +49,10 @@ class BrowserScraper:
             text, image_urls, title = self.scrape_text_with_selenium()
             return text, image_urls, title
         except Exception as e:
-            print(f"An error occurred during scraping: {str(e)}")
-            print("Full stack trace:")
+            print(f"抓取过程中发生错误: {str(e)}")
+            print("完整堆栈跟踪:")
             print(traceback.format_exc())
-            return f"An error occurred: {str(e)}\n\nStack trace:\n{traceback.format_exc()}", [], ""
+            return f"发生错误: {str(e)}\n\n堆栈跟踪:\n{traceback.format_exc()}", [], ""
         finally:
             if self.driver:
                 self.driver.quit()
@@ -72,13 +72,13 @@ class BrowserScraper:
             from selenium.webdriver.firefox.options import Options as FirefoxOptions
             from selenium.webdriver.safari.options import Options as SafariOptions
         except ImportError as e:
-            print(f"Failed to import Selenium: {str(e)}")
-            print("Please install Selenium and its dependencies to use BrowserScraper.")
-            print("You can install Selenium using pip:")
+            print(f"导入 Selenium 失败: {str(e)}")
+            print("要使用 BrowserScraper，请先安装 Selenium 及其依赖项。")
+            print("您可以使用 pip 安装 Selenium:")
             print("    pip install selenium")
-            print("If you're using a virtual environment, make sure it's activated.")
+            print("如果您使用的是虚拟环境，请确保已激活。")
             raise ImportError(
-                "Selenium is required but not installed. See error message above for installation instructions.") from e
+                "需要 Selenium 但未安装。请参阅上面的错误信息以获取安装说明。") from e
 
     def setup_driver(self) -> None:
         # print(f"Setting up {self.selenium_web_browser} driver...")
@@ -113,8 +113,8 @@ class BrowserScraper:
 
             # print(f"{self.selenium_web_browser.capitalize()} driver set up successfully.")
         except Exception as e:
-            print(f"Failed to set up {self.selenium_web_browser} driver: {str(e)}")
-            print("Full stack trace:")
+            print(f"设置 {self.selenium_web_browser} 驱动失败: {str(e)}")
+            print("完整堆栈跟踪:")
             print(traceback.format_exc())
             raise
 
@@ -126,7 +126,7 @@ class BrowserScraper:
             for cookie in cookies:
                 self.driver.add_cookie(cookie)
         else:
-            print("No saved cookies found.")
+            print("未找到保存的 cookies。")
 
     def _load_browser_cookies(self):
         """Load cookies directly from the browser"""
@@ -134,7 +134,7 @@ class BrowserScraper:
             import browser_cookie3
         except ImportError:
             print(
-                "browser_cookie3 is not installed. Please install it using: pip install browser_cookie3"
+                "未安装 browser_cookie3。请使用以下命令安装: pip install browser_cookie3"
             )
             return
 
@@ -143,7 +143,7 @@ class BrowserScraper:
         elif self.selenium_web_browser == "firefox":
             cookies = browser_cookie3.firefox()
         else:
-            print(f"Cookie loading not supported for {self.selenium_web_browser}")
+            print(f"{self.selenium_web_browser} 不支持加载 cookies")
             return
 
         for cookie in cookies:
@@ -156,9 +156,9 @@ class BrowserScraper:
             try:
                 os.remove(self.cookie_filename)
             except Exception as e:
-                print(f"Failed to remove cookie file: {str(e)}")
+                print(f"删除 cookie 文件失败: {str(e)}")
         else:
-            print("No cookie file found to remove.")
+            print("未找到要删除的 cookie 文件。")
 
     def _generate_random_string(self, length):
         """Generate a random string of specified length"""
@@ -184,8 +184,8 @@ class BrowserScraper:
 
             # print("Google cookies saved successfully.")
         except Exception as e:
-            print(f"Failed to visit Google and save cookies: {str(e)}")
-            print("Full stack trace:")
+            print(f"访问 Google 并保存 cookies 失败: {str(e)}")
+            print("完整堆栈跟踪:")
             print(traceback.format_exc())
 
     def scrape_text_with_selenium(self) -> tuple:
@@ -196,9 +196,9 @@ class BrowserScraper:
                 EC.presence_of_element_located((By.TAG_NAME, "body"))
             )
         except TimeoutException as e:
-            print("Timed out waiting for page to load")
-            print(f"Full stack trace:\n{traceback.format_exc()}")
-            return "Page load timed out", [], ""
+            print("等待页面加载超时")
+            print(f"完整堆栈跟踪:\n{traceback.format_exc()}")
+            return "页面加载超时", [], ""
 
         self._scroll_to_bottom()
 
@@ -237,7 +237,7 @@ class BrowserScraper:
     def _scroll_to_percentage(self, ratio: float) -> None:
         """Scroll to a percentage of the page"""
         if ratio < 0 or ratio > 1:
-            raise ValueError("Percentage should be between 0 and 1")
+            raise ValueError("百分比应在 0 到 1 之间")
         self.driver.execute_script(f"window.scrollTo(0, document.body.scrollHeight * {ratio});")
 
     def _add_header(self) -> None:

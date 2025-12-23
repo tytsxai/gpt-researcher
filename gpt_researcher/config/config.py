@@ -9,12 +9,12 @@ from .variables.base import BaseConfig
 
 
 class Config:
-    """Config class for GPT Researcher."""
+    """GPT Researcher 的配置类。"""
 
     CONFIG_DIR = os.path.join(os.path.dirname(__file__), "variables")
 
     def __init__(self, config_path: str | None = None):
-        """Initialize the config class."""
+        """初始化配置类。"""
         self.config_path = config_path
         self.llm_kwargs: Dict[str, Any] = {}
         self.embedding_kwargs: Dict[str, Any] = {}
@@ -27,11 +27,11 @@ class Config:
         if config_to_use['REPORT_SOURCE'] != 'web':
           self._set_doc_path(config_to_use)
 
-        # MCP support configuration
-        self.mcp_servers = []  # List of MCP server configurations
-        self.mcp_allowed_root_paths = []  # Allowed root paths for MCP servers
+        # MCP 支持配置
+        self.mcp_servers = []  # MCP 服务器配置列表
+        self.mcp_allowed_root_paths = []  # MCP 服务器允许的根路径
 
-        # Read from config
+        # 从配置中读取
         if hasattr(self, 'mcp_servers'):
             self.mcp_servers = self.mcp_servers
         if hasattr(self, 'mcp_allowed_root_paths'):
@@ -44,12 +44,12 @@ class Config:
                 value = self.convert_env_value(key, env_value, BaseConfig.__annotations__[key])
             setattr(self, key.lower(), value)
 
-        # Handle RETRIEVER with default value
+        # 处理 RETRIEVER 的默认值
         retriever_env = os.environ.get("RETRIEVER", config.get("RETRIEVER", "tavily"))
         try:
             self.retrievers = self.parse_retrievers(retriever_env)
         except ValueError as e:
-            print(f"Warning: {str(e)}. Defaulting to 'tavily' retriever.")
+            print(f"警告：{str(e)}。将默认使用 'tavily' 检索器。")
             self.retrievers = ["tavily"]
 
     def _set_embedding_attributes(self) -> None:
@@ -66,7 +66,7 @@ class Config:
     def _handle_deprecated_attributes(self) -> None:
         if os.getenv("EMBEDDING_PROVIDER") is not None:
             warnings.warn(
-                "EMBEDDING_PROVIDER is deprecated and will be removed soon. Use EMBEDDING instead.",
+                "EMBEDDING_PROVIDER 已弃用，即将移除。请使用 EMBEDDING 代替。",
                 FutureWarning,
                 stacklevel=2,
             )
@@ -90,11 +90,11 @@ class Config:
             elif embedding_provider == "google_genai":
                 self.embedding_model = "text-embedding-004"
             else:
-                raise Exception("Embedding provider not found.")
+                raise Exception("未找到嵌入提供者。")
 
         _deprecation_warning = (
-            "LLM_PROVIDER, FAST_LLM_MODEL and SMART_LLM_MODEL are deprecated and "
-            "will be removed soon. Use FAST_LLM and SMART_LLM instead."
+            "LLM_PROVIDER、FAST_LLM_MODEL 和 SMART_LLM_MODEL 已弃用，"
+            "即将移除。请使用 FAST_LLM 和 SMART_LLM 代替。"
         )
         if os.getenv("LLM_PROVIDER") is not None:
             warnings.warn(_deprecation_warning, FutureWarning, stacklevel=2)
@@ -117,42 +117,42 @@ class Config:
             try:
                 self.validate_doc_path()
             except Exception as e:
-                print(f"Warning: Error validating doc_path: {str(e)}. Using default doc_path.")
+                print(f"警告：验证 doc_path 时出错：{str(e)}。使用默认 doc_path。")
                 self.doc_path = DEFAULT_CONFIG['DOC_PATH']
 
     @classmethod
     def load_config(cls, config_path: str | None) -> Dict[str, Any]:
-        """Load a configuration by name."""
+        """按名称加载配置。"""
         if config_path is None:
             return DEFAULT_CONFIG
 
         # config_path = os.path.join(cls.CONFIG_DIR, config_path)
         if not os.path.exists(config_path):
             if config_path and config_path != "default":
-                print(f"Warning: Configuration not found at '{config_path}'. Using default configuration.")
+                print(f"警告：在 '{config_path}' 未找到配置。使用默认配置。")
                 if not config_path.endswith(".json"):
-                    print(f"Do you mean '{config_path}.json'?")
+                    print(f"你是指 '{config_path}.json' 吗？")
             return DEFAULT_CONFIG
 
         with open(config_path, "r") as f:
             custom_config = json.load(f)
 
-        # Merge with default config to ensure all keys are present
+        # 与默认配置合并以确保所有键都存在
         merged_config = DEFAULT_CONFIG.copy()
         merged_config.update(custom_config)
         return merged_config
 
     @classmethod
     def list_available_configs(cls) -> List[str]:
-        """List all available configuration names."""
+        """列出所有可用的配置名称。"""
         configs = ["default"]
         for file in os.listdir(cls.CONFIG_DIR):
             if file.endswith(".json"):
-                configs.append(file[:-5])  # Remove .json extension
+                configs.append(file[:-5])  # 移除 .json 后缀
         return configs
 
     def parse_retrievers(self, retriever_str: str) -> List[str]:
-        """Parse the retriever string into a list of retrievers and validate them."""
+        """解析检索器字符串为列表并校验其有效性。"""
         from ..retrievers.utils import get_all_retriever_names
         
         retrievers = [retriever.strip()
@@ -161,14 +161,14 @@ class Config:
         invalid_retrievers = [r for r in retrievers if r not in valid_retrievers]
         if invalid_retrievers:
             raise ValueError(
-                f"Invalid retriever(s) found: {', '.join(invalid_retrievers)}. "
-                f"Valid options are: {', '.join(valid_retrievers)}."
+                f"发现无效的检索器：{', '.join(invalid_retrievers)}。"
+                f"可用选项：{', '.join(valid_retrievers)}。"
             )
         return retrievers
 
     @staticmethod
     def parse_llm(llm_str: str | None) -> tuple[str | None, str | None]:
-        """Parse llm string into (llm_provider, llm_model)."""
+        """将 llm 字符串解析为 (llm_provider, llm_model)。"""
         from gpt_researcher.llm_provider.generic.base import _SUPPORTED_PROVIDERS
 
         if llm_str is None:
@@ -176,28 +176,30 @@ class Config:
         try:
             llm_provider, llm_model = llm_str.split(":", 1)
             assert llm_provider in _SUPPORTED_PROVIDERS, (
-                f"Unsupported {llm_provider}.\nSupported llm providers are: "
+                f"不支持 {llm_provider}。\n可用的 LLM 提供方："
                 + ", ".join(_SUPPORTED_PROVIDERS)
             )
             return llm_provider, llm_model
         except ValueError:
             raise ValueError(
-                "Set SMART_LLM or FAST_LLM = '<llm_provider>:<llm_model>' "
-                "Eg 'openai:gpt-4o-mini'"
+                "请设置 SMART_LLM 或 FAST_LLM = '<llm_provider>:<llm_model>' "
+                "例如 'openai:gpt-4o-mini'"
             )
 
     @staticmethod
     def parse_reasoning_effort(reasoning_effort_str: str | None) -> str | None:
-        """Parse reasoning effort string into (reasoning_effort)."""
+        """解析推理强度字符串为 (reasoning_effort)。"""
         if reasoning_effort_str is None:
             return ReasoningEfforts.Medium.value
         if reasoning_effort_str not in [effort.value for effort in ReasoningEfforts]:
-            raise ValueError(f"Invalid reasoning effort: {reasoning_effort_str}. Valid options are: {', '.join([effort.value for effort in ReasoningEfforts])}")
+            raise ValueError(
+                f"无效的推理强度：{reasoning_effort_str}。可用选项：{', '.join([effort.value for effort in ReasoningEfforts])}"
+            )
         return reasoning_effort_str
 
     @staticmethod
     def parse_embedding(embedding_str: str | None) -> tuple[str | None, str | None]:
-        """Parse embedding string into (embedding_provider, embedding_model)."""
+        """将 embedding 字符串解析为 (embedding_provider, embedding_model)。"""
         from gpt_researcher.memory.embeddings import _SUPPORTED_PROVIDERS
 
         if embedding_str is None:
@@ -205,28 +207,28 @@ class Config:
         try:
             embedding_provider, embedding_model = embedding_str.split(":", 1)
             assert embedding_provider in _SUPPORTED_PROVIDERS, (
-                f"Unsupported {embedding_provider}.\nSupported embedding providers are: "
+                f"不支持 {embedding_provider}。\n可用的 embedding 提供方："
                 + ", ".join(_SUPPORTED_PROVIDERS)
             )
             return embedding_provider, embedding_model
         except ValueError:
             raise ValueError(
-                "Set EMBEDDING = '<embedding_provider>:<embedding_model>' "
-                "Eg 'openai:text-embedding-3-large'"
+                "请设置 EMBEDDING = '<embedding_provider>:<embedding_model>' "
+                "例如 'openai:text-embedding-3-large'"
             )
 
     def validate_doc_path(self):
-        """Ensure that the folder exists at the doc path"""
+        """确保 doc_path 路径存在。"""
         os.makedirs(self.doc_path, exist_ok=True)
 
     @staticmethod
     def convert_env_value(key: str, env_value: str, type_hint: Type) -> Any:
-        """Convert environment variable to the appropriate type based on the type hint."""
+        """根据类型提示将环境变量转换为对应类型。"""
         origin = get_origin(type_hint)
         args = get_args(type_hint)
 
         if origin is Union:
-            # Handle Union types (e.g., Union[str, None])
+            # 处理 Union 类型（例如 Union[str, None]）
             for arg in args:
                 if arg is type(None):
                     if env_value.lower() in ("none", "null", ""):
@@ -236,7 +238,7 @@ class Config:
                         return Config.convert_env_value(key, env_value, arg)
                     except ValueError:
                         continue
-            raise ValueError(f"Cannot convert {env_value} to any of {args}")
+            raise ValueError(f"无法将 {env_value} 转换为 {args} 中的任意类型")
 
         if type_hint is bool:
             return env_value.lower() in ("true", "1", "yes", "on")
@@ -251,22 +253,22 @@ class Config:
         elif type_hint is dict:
             return json.loads(env_value)
         else:
-            raise ValueError(f"Unsupported type {type_hint} for key {key}")
+            raise ValueError(f"不支持的类型 {type_hint}（key: {key}）")
 
 
     def set_verbose(self, verbose: bool) -> None:
-        """Set the verbosity level."""
+        """设置日志详细级别。"""
         self.llm_kwargs["verbose"] = verbose
 
     def get_mcp_server_config(self, name: str) -> dict:
         """
-        Get the configuration for an MCP server.
+        获取 MCP 服务器的配置。
         
         Args:
-            name (str): The name of the MCP server to get the config for.
+            name (str): 要获取配置的 MCP 服务器名称。
                 
         Returns:
-            dict: The server configuration, or an empty dict if the server is not found.
+            dict: 服务器配置；未找到时返回空字典。
         """
         if not name or not self.mcp_servers:
             return {}

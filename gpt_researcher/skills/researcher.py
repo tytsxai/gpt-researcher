@@ -32,17 +32,17 @@ class ResearchConductor:
         await stream_output(
             "logs",
             "planning_research",
-            f"🌐 Browsing the web to learn more about the task: {query}...",
+            f"🌐 正在浏览网络以了解更多关于任务的信息: {query}...",
             self.researcher.websocket,
         )
 
         search_results = await get_search_results(query, self.researcher.retrievers[0], query_domains, researcher=self.researcher)
-        self.logger.info(f"Initial search results obtained: {len(search_results)} results")
+        self.logger.info(f"已获取初始搜索结果: {len(search_results)} 条")
 
         await stream_output(
             "logs",
             "planning_research",
-            f"🤔 Planning the research strategy and subtasks...",
+            f"🤔 正在规划研究策略和子任务...",
             self.researcher.websocket,
         )
 
@@ -60,7 +60,7 @@ class ResearchConductor:
             retriever_names=retriever_names,  # Pass retriever names for MCP optimization
             **self.researcher.kwargs
         )
-        self.logger.info(f"Research outline planned: {outline}")
+        self.logger.info(f"已生成研究大纲: {outline}")
         return outline
 
     async def conduct_research(self):
@@ -68,11 +68,11 @@ class ResearchConductor:
         if self.json_handler:
             self.json_handler.update_content("query", self.researcher.query)
         
-        self.logger.info(f"Starting research for query: {self.researcher.query}")
+        self.logger.info(f"开始研究查询: {self.researcher.query}")
         
         # Log active retrievers once at the start of research
         retriever_names = [r.__name__ for r in self.researcher.retrievers]
-        self.logger.info(f"Active retrievers: {retriever_names}")
+        self.logger.info(f"启用的检索器: {retriever_names}")
         
         # Reset visited_urls and source_urls at the start of each research task
         self.researcher.visited_urls.clear()
@@ -82,7 +82,7 @@ class ResearchConductor:
             await stream_output(
                 "logs",
                 "starting_research",
-                f"🔍 Starting the research task for '{self.researcher.query}'...",
+                f"🔍 正在开始研究任务 '{self.researcher.query}'...",
                 self.researcher.websocket,
             )
             await stream_output(
@@ -106,30 +106,30 @@ class ResearchConductor:
         # Check if MCP retrievers are configured
         has_mcp_retriever = any("mcpretriever" in r.__name__.lower() for r in self.researcher.retrievers)
         if has_mcp_retriever:
-            self.logger.info("MCP retrievers configured and will be used with standard research flow")
+            self.logger.info("已配置 MCP 检索器，将按标准研究流程使用")
 
         # Conduct research based on the source type
         if self.researcher.source_urls:
-            self.logger.info("Using provided source URLs")
+            self.logger.info("使用提供的来源 URL")
             research_data = await self._get_context_by_urls(self.researcher.source_urls)
             if research_data and len(research_data) == 0 and self.researcher.verbose:
                 await stream_output(
                     "logs",
                     "answering_from_memory",
-                    f"🧐 I was unable to find relevant context in the provided sources...",
+                    f"🧐 无法在提供的来源中找到相关内容...",
                     self.researcher.websocket,
                 )
             if self.researcher.complement_source_urls:
-                self.logger.info("Complementing with web search")
+                self.logger.info("补充进行网络搜索")
                 additional_research = await self._get_context_by_web_search(self.researcher.query, [], self.researcher.query_domains)
                 research_data += ' '.join(additional_research)
         elif self.researcher.report_source == ReportSource.Web.value:
-            self.logger.info("Using web search with all configured retrievers")
+            self.logger.info("使用所有已配置检索器进行网络搜索")
             research_data = await self._get_context_by_web_search(self.researcher.query, [], self.researcher.query_domains)
         elif self.researcher.report_source == ReportSource.Local.value:
-            self.logger.info("Using local search")
+            self.logger.info("使用本地搜索")
             document_data = await DocumentLoader(self.researcher.cfg.doc_path).load()
-            self.logger.info(f"Loaded {len(document_data)} documents")
+            self.logger.info(f"已加载 {len(document_data)} 个文档")
             if self.researcher.vector_store:
                 self.researcher.vector_store.load(document_data)
 
@@ -170,32 +170,32 @@ class ResearchConductor:
         # Rank and curate the sources
         self.researcher.context = research_data
         if self.researcher.cfg.curate_sources:
-            self.logger.info("Curating sources")
+            self.logger.info("正在整理来源")
             self.researcher.context = await self.researcher.source_curator.curate_sources(research_data)
 
         if self.researcher.verbose:
             await stream_output(
                 "logs",
                 "research_step_finalized",
-                f"Finalized research step.\n💸 Total Research Costs: ${self.researcher.get_costs()}",
+                f"研究步骤已完成。\n💸 总研究成本: ${self.researcher.get_costs()}",
                 self.researcher.websocket,
             )
             if self.json_handler:
                 self.json_handler.update_content("costs", self.researcher.get_costs())
                 self.json_handler.update_content("context", self.researcher.context)
 
-        self.logger.info(f"Research completed. Context size: {len(str(self.researcher.context))}")
+        self.logger.info(f"研究完成。上下文大小: {len(str(self.researcher.context))}")
         return self.researcher.context
 
     async def _get_context_by_urls(self, urls):
         """Scrapes and compresses the context from the given urls"""
-        self.logger.info(f"Getting context from URLs: {urls}")
+        self.logger.info(f"从 URL 获取上下文: {urls}")
         
         new_search_urls = await self._get_new_urls(urls)
-        self.logger.info(f"New URLs to process: {new_search_urls}")
+        self.logger.info(f"待处理的新 URL: {new_search_urls}")
 
         scraped_content = await self.researcher.scraper_manager.browse_urls(new_search_urls)
-        self.logger.info(f"Scraped content from {len(scraped_content)} URLs")
+        self.logger.info(f"已抓取 {len(scraped_content)} 个 URL 的内容")
 
         if self.researcher.vector_store:
             self.researcher.vector_store.load(scraped_content)
@@ -213,7 +213,7 @@ class ResearchConductor:
         Returns:
             context: List of context
         """
-        self.logger.info(f"Starting vectorstore search for query: {query}")
+        self.logger.info(f"开始向量库搜索查询: {query}")
         context = []
         # Generate Sub-Queries including original query
         sub_queries = await self.plan_research(query)
@@ -225,7 +225,7 @@ class ResearchConductor:
             await stream_output(
                 "logs",
                 "subqueries",
-                f"🗂️  I will conduct my research based on the following queries: {sub_queries}...",
+                f"🗂️ 我将基于以下查询进行研究: {sub_queries}...",
                 self.researcher.websocket,
                 True,
                 sub_queries,
@@ -246,7 +246,7 @@ class ResearchConductor:
         Returns:
             context: List of context
         """
-        self.logger.info(f"Starting web search for query: {query}")
+        self.logger.info(f"开始网络搜索查询: {query}")
         
         if scraped_data is None:
             scraped_data = []
@@ -262,50 +262,50 @@ class ResearchConductor:
         if mcp_retrievers and self._mcp_results_cache is None:
             if mcp_strategy == "disabled":
                 # MCP disabled - skip MCP research entirely
-                self.logger.info("MCP disabled by strategy, skipping MCP research")
+                self.logger.info("MCP 已按策略禁用，跳过 MCP 研究")
                 if self.researcher.verbose:
                     await stream_output(
                         "logs",
                         "mcp_disabled",
-                        f"⚡ MCP research disabled by configuration",
+                        f"⚡ MCP 研究已被配置禁用",
                         self.researcher.websocket,
                     )
             elif mcp_strategy == "fast":
                 # Fast: Run MCP once with original query
-                self.logger.info("MCP fast strategy: Running once with original query")
+                self.logger.info("MCP 快速策略: 仅使用原始查询运行一次")
                 if self.researcher.verbose:
                     await stream_output(
                         "logs",
                         "mcp_optimization",
-                        f"🚀 MCP Fast: Running once for main query (performance mode)",
+                        f"🚀 MCP 快速模式: 仅对主查询运行一次 (性能模式)",
                         self.researcher.websocket,
                     )
                 
                 # Execute MCP research once with the original query
                 mcp_context = await self._execute_mcp_research_for_queries([query], mcp_retrievers)
                 self._mcp_results_cache = mcp_context
-                self.logger.info(f"MCP results cached: {len(mcp_context)} total context entries")
+                self.logger.info(f"MCP 结果已缓存: 共 {len(mcp_context)} 条上下文条目")
             elif mcp_strategy == "deep":
                 # Deep: Will run MCP for all queries (original behavior) - defer to per-query execution
-                self.logger.info("MCP deep strategy: Will run for all queries")
+                self.logger.info("MCP 深度策略: 将对所有查询运行")
                 if self.researcher.verbose:
                     await stream_output(
                         "logs",
                         "mcp_comprehensive",
-                        f"🔍 MCP Deep: Will run for each sub-query (thorough mode)",
+                        f"🔍 MCP 深度模式: 将对每个子查询运行（全面模式）",
                         self.researcher.websocket,
                     )
                 # Don't cache - let each sub-query run MCP individually
             else:
                 # Unknown strategy - default to fast
-                self.logger.warning(f"Unknown MCP strategy '{mcp_strategy}', defaulting to fast")
+                self.logger.warning(f"未知的 MCP 策略 '{mcp_strategy}'，将回退为快速模式")
                 mcp_context = await self._execute_mcp_research_for_queries([query], mcp_retrievers)
                 self._mcp_results_cache = mcp_context
-                self.logger.info(f"MCP results cached: {len(mcp_context)} total context entries")
+                self.logger.info(f"MCP 结果已缓存: 共 {len(mcp_context)} 条上下文条目")
 
         # Generate Sub-Queries including original query
         sub_queries = await self.plan_research(query, query_domains)
-        self.logger.info(f"Generated sub-queries: {sub_queries}")
+        self.logger.info(f"已生成子查询: {sub_queries}")
         
         # If this is not part of a sub researcher, add original query to research for better results
         if self.researcher.report_type != "subtopic_report":
@@ -315,7 +315,7 @@ class ResearchConductor:
             await stream_output(
                 "logs",
                 "subqueries",
-                f"🗂️ I will conduct my research based on the following queries: {sub_queries}...",
+                f"🗂️ 我将基于以下查询进行研究: {sub_queries}...",
                 self.researcher.websocket,
                 True,
                 sub_queries,
@@ -329,16 +329,16 @@ class ResearchConductor:
                     for sub_query in sub_queries
                 ]
             )
-            self.logger.info(f"Gathered context from {len(context)} sub-queries")
+            self.logger.info(f"已汇总 {len(context)} 个子查询的上下文")
             # Filter out empty results and join the context
             context = [c for c in context if c]
             if context:
                 combined_context = " ".join(context)
-                self.logger.info(f"Combined context size: {len(combined_context)}")
+                self.logger.info(f"合并后的上下文大小: {len(combined_context)}")
                 return combined_context
             return []
         except Exception as e:
-            self.logger.error(f"Error during web search: {e}", exc_info=True)
+            self.logger.error(f"网络搜索过程中出错: {e}", exc_info=True)
             return []
 
     def _get_mcp_strategy(self) -> str:
@@ -381,7 +381,7 @@ class ResearchConductor:
         all_mcp_context = []
         
         for i, query in enumerate(queries, 1):
-            self.logger.info(f"Executing MCP research for query {i}/{len(queries)}: {query}")
+            self.logger.info(f"执行 MCP 研究 查询 {i}/{len(queries)}: {query}")
             
             for retriever in mcp_retrievers:
                 try:
@@ -402,22 +402,22 @@ class ResearchConductor:
                                 }
                                 all_mcp_context.append(context_entry)
                         
-                        self.logger.info(f"Added {len(mcp_results)} MCP results for query: {query}")
+                        self.logger.info(f"已添加 {len(mcp_results)} 条 MCP 结果，查询: {query}")
                         
                         if self.researcher.verbose:
                             await stream_output(
                                 "logs",
                                 "mcp_results_cached",
-                                f"✅ Cached {len(mcp_results)} MCP results from query {i}/{len(queries)}",
+                                f"✅ 已缓存查询 {i}/{len(queries)} 的 {len(mcp_results)} 条 MCP 结果",
                                 self.researcher.websocket,
                             )
                 except Exception as e:
-                    self.logger.error(f"Error in MCP research for query '{query}': {e}")
+                    self.logger.error(f"MCP 研究出错，查询 '{query}': {e}")
                     if self.researcher.verbose:
                         await stream_output(
                             "logs",
                             "mcp_cache_error",
-                            f"⚠️ MCP research error for query {i}, continuing with other sources",
+                            f"⚠️ 查询 {i} 的 MCP 研究出错，继续使用其他来源",
                             self.researcher.websocket,
                         )
         
@@ -435,7 +435,7 @@ class ResearchConductor:
             await stream_output(
                 "logs",
                 "running_subquery_research",
-                f"\n🔍 Running research for '{sub_query}'...",
+                f"\n🔍 正在为 '{sub_query}' 进行研究...",
                 self.researcher.websocket,
             )
 
@@ -455,7 +455,7 @@ class ResearchConductor:
             if mcp_retrievers:
                 if mcp_strategy == "disabled":
                     # MCP disabled - skip entirely
-                    self.logger.info(f"MCP disabled for sub-query: {sub_query}")
+                    self.logger.info(f"子查询已禁用 MCP: {sub_query}")
                 elif mcp_strategy == "fast" and self._mcp_results_cache is not None:
                     # Fast: Use cached results
                     mcp_context = self._mcp_results_cache.copy()
@@ -464,31 +464,31 @@ class ResearchConductor:
                         await stream_output(
                             "logs",
                             "mcp_cache_reuse",
-                            f"♻️ Reusing cached MCP results ({len(mcp_context)} sources) for: {sub_query}",
+                            f"♻️ 正在为 {sub_query} 复用已缓存的 MCP 结果（{len(mcp_context)} 个来源）",
                             self.researcher.websocket,
                         )
                     
-                    self.logger.info(f"Reused {len(mcp_context)} cached MCP results for sub-query: {sub_query}")
+                    self.logger.info(f"子查询复用 {len(mcp_context)} 条已缓存的 MCP 结果: {sub_query}")
                 elif mcp_strategy == "deep":
                     # Deep: Run MCP for every sub-query
-                    self.logger.info(f"Running deep MCP research for: {sub_query}")
+                    self.logger.info(f"正在为 {sub_query} 运行深度 MCP 研究")
                     if self.researcher.verbose:
                         await stream_output(
                             "logs",
                             "mcp_comprehensive_run",
-                            f"🔍 Running deep MCP research for: {sub_query}",
+                        f"🔍 正在为 {sub_query} 运行深度 MCP 研究",
                             self.researcher.websocket,
                         )
                     
                     mcp_context = await self._execute_mcp_research_for_queries([sub_query], mcp_retrievers)
                 else:
                     # Fallback: if no cache and not deep mode, run MCP for this query
-                    self.logger.warning("MCP cache not available, falling back to per-sub-query execution")
+                    self.logger.warning("MCP 缓存不可用，回退为按子查询执行")
                     if self.researcher.verbose:
                         await stream_output(
                             "logs",
                             "mcp_fallback",
-                            f"🔌 MCP cache unavailable, running MCP research for: {sub_query}",
+                        f"🔌 MCP 缓存不可用，正在为 {sub_query} 执行 MCP 研究",
                             self.researcher.websocket,
                         )
                     
@@ -497,12 +497,12 @@ class ResearchConductor:
             # Get web search context using non-MCP retrievers (if no scraped data provided)
             if not scraped_data:
                 scraped_data = await self._scrape_data_by_urls(sub_query, query_domains)
-                self.logger.info(f"Scraped data size: {len(scraped_data)}")
+                self.logger.info(f"抓取数据量: {len(scraped_data)}")
 
             # Get similar content based on scraped data
             if scraped_data:
                 web_context = await self.researcher.context_manager.get_similar_content_by_query(sub_query, scraped_data)
-                self.logger.info(f"Web content found for sub-query: {len(str(web_context)) if web_context else 0} chars")
+                self.logger.info(f"子查询网页内容长度: {len(str(web_context)) if web_context else 0} 字符")
 
             # Combine MCP context with web context intelligently
             combined_context = self._combine_mcp_and_web_context(mcp_context, web_context, sub_query)
@@ -510,26 +510,26 @@ class ResearchConductor:
             # Log context combination results
             if combined_context:
                 context_length = len(str(combined_context))
-                self.logger.info(f"Combined context for '{sub_query}': {context_length} chars")
+                self.logger.info(f"子查询 '{sub_query}' 合并上下文: {context_length} 字符")
                 
                 if self.researcher.verbose:
                     mcp_count = len(mcp_context)
                     web_available = bool(web_context)
                     cache_used = self._mcp_results_cache is not None and mcp_retrievers and mcp_strategy != "deep"
-                    cache_status = " (cached)" if cache_used else ""
+                    cache_status = "（已缓存）" if cache_used else ""
                     await stream_output(
                         "logs",
                         "context_combined",
-                        f"📚 Combined research context: {mcp_count} MCP sources{cache_status}, {'web content' if web_available else 'no web content'}",
+                        f"📚 合并研究上下文: {mcp_count} 个 MCP 来源{cache_status}, {'包含网页内容' if web_available else '不包含网页内容'}",
                         self.researcher.websocket,
                     )
             else:
-                self.logger.warning(f"No combined context found for sub-query: {sub_query}")
+                self.logger.warning(f"未找到子查询的合并上下文: {sub_query}")
                 if self.researcher.verbose:
                     await stream_output(
                         "logs",
                         "subquery_context_not_found",
-                        f"🤷 No content found for '{sub_query}'...",
+                        f"🤷 未找到 '{sub_query}' 的内容...",
                         self.researcher.websocket,
                     )
             
@@ -544,12 +544,12 @@ class ResearchConductor:
             return combined_context
             
         except Exception as e:
-            self.logger.error(f"Error processing sub-query {sub_query}: {e}", exc_info=True)
+            self.logger.error(f"处理子查询出错 {sub_query}: {e}", exc_info=True)
             if self.researcher.verbose:
                 await stream_output(
                     "logs",
                     "subquery_error",
-                    f"❌ Error processing '{sub_query}': {str(e)}",
+                    f"❌ 处理 '{sub_query}' 出错: {str(e)}",
                     self.researcher.websocket,
                 )
             return ""
@@ -567,7 +567,7 @@ class ResearchConductor:
         """
         retriever_name = retriever.__name__
         
-        self.logger.info(f"Executing MCP research with {retriever_name} for query: {query}")
+        self.logger.info(f"使用 {retriever_name} 执行 MCP 研究，查询: {query}")
         
         try:
             # Instantiate the MCP retriever with proper parameters
@@ -584,7 +584,7 @@ class ResearchConductor:
                 await stream_output(
                     "logs",
                     "mcp_retrieval_stage1",
-                    f"🧠 Stage 1: Selecting optimal MCP tools for: {query}",
+                    f"🧠 阶段 1: 为 {query} 选择最优 MCP 工具",
                     self.researcher.websocket,
                 )
             
@@ -595,35 +595,35 @@ class ResearchConductor:
             
             if results:
                 result_count = len(results)
-                self.logger.info(f"MCP research completed: {result_count} results from {retriever_name}")
+                self.logger.info(f"MCP 研究完成: 来自 {retriever_name} 的 {result_count} 条结果")
                 
                 if self.researcher.verbose:
                     await stream_output(
                         "logs",
                         "mcp_research_complete",
-                        f"🎯 MCP research completed: {result_count} intelligent results obtained",
+                        f"🎯 MCP 研究完成: 获得 {result_count} 条智能结果",
                         self.researcher.websocket,
                     )
                 
                 return results
             else:
-                self.logger.info(f"No results returned from MCP research with {retriever_name}")
+                self.logger.info(f"{retriever_name} 的 MCP 研究未返回结果")
                 if self.researcher.verbose:
                     await stream_output(
                         "logs",
                         "mcp_no_results",
-                        f"ℹ️ No relevant information found via MCP for: {query}",
+                        f"ℹ️ MCP 未找到与 {query} 相关的信息",
                         self.researcher.websocket,
                     )
                 return []
                 
         except Exception as e:
-            self.logger.error(f"Error in MCP research with {retriever_name}: {str(e)}")
+            self.logger.error(f"{retriever_name} 的 MCP 研究出错: {str(e)}")
             if self.researcher.verbose:
                 await stream_output(
                     "logs",
                     "mcp_research_error",
-                    f"⚠️ MCP research error: {str(e)} - continuing with other sources",
+                    f"⚠️ MCP 研究出错: {str(e)} - 继续使用其他来源",
                     self.researcher.websocket,
                 )
             return []
@@ -645,7 +645,7 @@ class ResearchConductor:
         # Add web context first if available
         if web_context and web_context.strip():
             combined_parts.append(web_context.strip())
-            self.logger.debug(f"Added web context: {len(web_context)} chars")
+            self.logger.debug(f"已添加网页上下文: {len(web_context)} 字符")
         
         # Add MCP context with proper formatting
         if mcp_context:
@@ -654,14 +654,14 @@ class ResearchConductor:
             for i, item in enumerate(mcp_context):
                 content = item.get("content", "")
                 url = item.get("url", "")
-                title = item.get("title", f"MCP Result {i+1}")
+                title = item.get("title", f"MCP 结果 {i+1}")
                 
                 if content and content.strip():
                     # Create a well-formatted context entry
                     if url and url != f"mcp://llm_analysis":
-                        citation = f"\n\n*Source: {title} ({url})*"
+                        citation = f"\n\n*来源: {title} ({url})*"
                     else:
-                        citation = f"\n\n*Source: {title}*"
+                        citation = f"\n\n*来源: {title}*"
                     
                     formatted_content = f"{content.strip()}{citation}"
                     mcp_formatted.append(formatted_content)
@@ -670,15 +670,15 @@ class ResearchConductor:
                 # Join MCP results with clear separation
                 mcp_section = "\n\n---\n\n".join(mcp_formatted)
                 combined_parts.append(mcp_section)
-                self.logger.debug(f"Added {len(mcp_context)} MCP context entries")
+                self.logger.debug(f"已添加 {len(mcp_context)} 条 MCP 上下文条目")
         
         # Combine all parts
         if combined_parts:
             final_context = "\n\n".join(combined_parts)
-            self.logger.info(f"Combined context for '{sub_query}': {len(final_context)} total chars")
+            self.logger.info(f"子查询 '{sub_query}' 合并上下文: 共 {len(final_context)} 字符")
             return final_context
         else:
-            self.logger.warning(f"No context to combine for sub-query: {sub_query}")
+            self.logger.warning(f"子查询无可合并上下文: {sub_query}")
             return ""
 
     async def _process_sub_query_with_vectorstore(self, sub_query: str, filter: dict | None = None):
@@ -694,7 +694,7 @@ class ResearchConductor:
             await stream_output(
                 "logs",
                 "running_subquery_with_vectorstore_research",
-                f"\n🔍 Running research for '{sub_query}'...",
+                f"\n🔍 正在为 '{sub_query}' 进行研究...",
                 self.researcher.websocket,
             )
 
@@ -717,7 +717,7 @@ class ResearchConductor:
                     await stream_output(
                         "logs",
                         "added_source_url",
-                        f"✅ Added source url to research: {url}\n",
+                        f"✅ 已将来源 URL 加入研究: {url}\n",
                         self.researcher.websocket,
                         True,
                         url,
@@ -750,7 +750,7 @@ class ResearchConductor:
                 search_urls = [url.get("href") for url in search_results if url.get("href")]
                 new_search_urls.extend(search_urls)
             except Exception as e:
-                self.logger.error(f"Error searching with {retriever_class.__name__}: {e}")
+                self.logger.error(f"使用 {retriever_class.__name__} 搜索出错: {e}")
 
         # Get unique URLs
         new_search_urls = await self._get_new_urls(new_search_urls)
@@ -778,7 +778,7 @@ class ResearchConductor:
             await stream_output(
                 "logs",
                 "researching",
-                f"🤔 Researching for relevant information across multiple sources...\n",
+                f"🤔 正在跨多个来源检索相关信息...\n",
                 self.researcher.websocket,
             )
 
@@ -804,7 +804,7 @@ class ResearchConductor:
         retriever_name = retriever.__name__
         is_mcp_retriever = "mcpretriever" in retriever_name.lower()
         
-        self.logger.info(f"Searching with {retriever_name} for query: {query}")
+        self.logger.info(f"使用 {retriever_name} 搜索，查询: {query}")
         
         try:
             # Instantiate the retriever
@@ -821,7 +821,7 @@ class ResearchConductor:
                 await stream_output(
                     "logs",
                     "mcp_retrieval",
-                    f"🔌 Consulting MCP server(s) for information on: {query}",
+                    f"🔌 正在查询 MCP 服务器获取信息: {query}",
                     self.researcher.websocket,
                 )
             
@@ -834,7 +834,7 @@ class ResearchConductor:
                 # Log result information
                 if results:
                     result_count = len(results)
-                    self.logger.info(f"Received {result_count} results from {retriever_name}")
+                    self.logger.info(f"从 {retriever_name} 收到 {result_count} 条结果")
                     
                     # Special logging for MCP retriever
                     if is_mcp_retriever:
@@ -842,40 +842,40 @@ class ResearchConductor:
                             await stream_output(
                                 "logs",
                                 "mcp_results",
-                                f"✓ Retrieved {result_count} results from MCP server",
+                                f"✓ 已从 MCP 服务器检索到 {result_count} 条结果",
                                 self.researcher.websocket,
                             )
                         
                         # Log result details
                         for i, result in enumerate(results[:3]):  # Log first 3 results
-                            title = result.get("title", "No title")
-                            url = result.get("href", "No URL")
+                            title = result.get("title", "无标题")
+                            url = result.get("href", "无 URL")
                             content_length = len(result.get("body", "")) if result.get("body") else 0
-                            self.logger.info(f"MCP result {i+1}: '{title}' from {url} ({content_length} chars)")
+                            self.logger.info(f"MCP 结果 {i+1}: '{title}' 来自 {url} ({content_length} 字符)")
                             
                         if result_count > 3:
-                            self.logger.info(f"... and {result_count - 3} more MCP results")
+                            self.logger.info(f"... 以及另外 {result_count - 3} 条 MCP 结果")
                 else:
-                    self.logger.info(f"No results returned from {retriever_name}")
+                    self.logger.info(f"{retriever_name} 未返回结果")
                     if is_mcp_retriever and self.researcher.verbose:
                         await stream_output(
                             "logs",
                             "mcp_no_results",
-                            f"ℹ️ No relevant information found from MCP server for: {query}",
+                            f"ℹ️ MCP 服务器未找到与 {query} 相关的信息",
                             self.researcher.websocket,
                         )
                 
                 return results
             else:
-                self.logger.error(f"Retriever {retriever_name} does not have a search method")
+                self.logger.error(f"检索器 {retriever_name} 没有 search 方法")
                 return []
         except Exception as e:
-            self.logger.error(f"Error searching with {retriever_name}: {str(e)}")
+            self.logger.error(f"使用 {retriever_name} 搜索出错: {str(e)}")
             if is_mcp_retriever and self.researcher.verbose:
                 await stream_output(
                     "logs",
                     "mcp_error",
-                    f"❌ Error retrieving information from MCP server: {str(e)}",
+                    f"❌ 从 MCP 服务器检索信息出错: {str(e)}",
                     self.researcher.websocket,
                 )
             return []
@@ -890,7 +890,7 @@ class ResearchConductor:
         Returns:
             list: Extracted content
         """
-        self.logger.info(f"Extracting content from {len(results)} search results")
+        self.logger.info(f"正在从 {len(results)} 条搜索结果中提取内容")
         
         # Get the URLs from the search results
         urls = []
@@ -928,7 +928,7 @@ class ResearchConductor:
         Returns:
             str: Summarized content
         """
-        self.logger.info(f"Summarizing content for query: {query}")
+        self.logger.info(f"正在为查询生成摘要: {query}")
         
         # Skip if no content
         if not content:
@@ -954,7 +954,7 @@ class ResearchConductor:
             await stream_output(
                 "logs",
                 "research_progress",
-                f"📊 Research Progress: {progress}%",
+                f"📊 研究进度: {progress}%",
                 self.researcher.websocket,
                 True,
                 {
@@ -963,4 +963,3 @@ class ResearchConductor:
                     "progress": progress
                 }
             )
-

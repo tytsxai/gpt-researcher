@@ -62,46 +62,46 @@ class GPTResearcher:
         **kwargs
     ):
         """
-        Initialize a GPT Researcher instance.
+        初始化 GPT Researcher 实例。
         
         Args:
-            query (str): The research query or question.
-            report_type (str): Type of report to generate.
-            report_format (str): Format of the report (markdown, pdf, etc).
-            report_source (str): Source of information for the report (web, local, etc).
-            tone (Tone): Tone of the report.
-            source_urls (list[str], optional): List of specific URLs to use as sources.
-            document_urls (list[str], optional): List of document URLs to use as sources.
-            complement_source_urls (bool): Whether to complement source URLs with web search.
-            query_domains (list[str], optional): List of domains to restrict search to.
-            documents: Document objects for LangChain integration.
-            vector_store: Vector store for document retrieval.
-            vector_store_filter: Filter for vector store queries.
-            config_path: Path to configuration file.
-            websocket: WebSocket for streaming output.
-            agent: Pre-defined agent type.
-            role: Pre-defined agent role.
-            parent_query: Parent query for subtopic reports.
-            subtopics: List of subtopics to research.
-            visited_urls: Set of already visited URLs.
-            verbose (bool): Whether to output verbose logs.
-            context: Pre-loaded research context.
-            headers (dict, optional): Additional headers for requests and configuration.
-            max_subtopics (int): Maximum number of subtopics to generate.
-            log_handler: Handler for logging events.
-            prompt_family: Family of prompts to use.
-            mcp_configs (list[dict], optional): List of MCP server configurations.
-                Each dictionary can contain:
-                - name (str): Name of the MCP server
-                - command (str): Command to start the server
-                - args (list[str]): Arguments for the server command
-                - tool_name (str): Specific tool to use on the MCP server
-                - env (dict): Environment variables for the server
-                - connection_url (str): URL for WebSocket or HTTP connection
-                - connection_type (str): Connection type (stdio, websocket, http)
-                - connection_token (str): Authentication token for remote connections
+            query (str): 研究查询或问题。
+            report_type (str): 生成的报告类型。
+            report_format (str): 报告格式（markdown、pdf 等）。
+            report_source (str): 报告信息来源（web、local 等）。
+            tone (Tone): 报告语气。
+            source_urls (list[str], optional): 作为来源的指定 URL 列表。
+            document_urls (list[str], optional): 作为来源的文档 URL 列表。
+            complement_source_urls (bool): 是否使用网页搜索补充来源 URL。
+            query_domains (list[str], optional): 限制搜索范围的域名列表。
+            documents: 用于 LangChain 集成的文档对象。
+            vector_store: 用于文档检索的向量存储。
+            vector_store_filter: 向量存储查询过滤器。
+            config_path: 配置文件路径。
+            websocket: 用于流式输出的 WebSocket。
+            agent: 预先指定的 agent 类型。
+            role: 预先指定的 agent 角色。
+            parent_query: 子主题报告的父查询。
+            subtopics: 需要研究的子主题列表。
+            visited_urls: 已访问 URL 的集合。
+            verbose (bool): 是否输出详细日志。
+            context: 预加载的研究上下文。
+            headers (dict, optional): 请求与配置的额外 headers。
+            max_subtopics (int): 最大生成子主题数量。
+            log_handler: 日志事件处理器。
+            prompt_family: 要使用的提示词家族。
+            mcp_configs (list[dict], optional): MCP 服务器配置列表。
+                每个字典可包含：
+                - name (str): MCP 服务器名称
+                - command (str): 启动服务器的命令
+                - args (list[str]): 服务器命令参数
+                - tool_name (str): 在 MCP 服务器上使用的特定工具
+                - env (dict): 服务器环境变量
+                - connection_url (str): WebSocket 或 HTTP 连接的 URL
+                - connection_type (str): 连接类型（stdio、websocket、http）
+                - connection_token (str): 远程连接的认证令牌
                 
-                Example:
+                示例：
                 ```python
                 mcp_configs=[{
                     "command": "python",
@@ -109,10 +109,10 @@ class GPTResearcher:
                     "name": "search"
                 }]
                 ```
-            mcp_strategy (str, optional): MCP execution strategy. Options:
-                - "fast" (default): Run MCP once with original query for best performance
-                - "deep": Run MCP for all sub-queries for maximum thoroughness  
-                - "disabled": Skip MCP entirely, use only web retrievers
+            mcp_strategy (str, optional): MCP 执行策略。可选项：
+                - "fast"（默认）：使用原始查询运行一次 MCP，性能最佳
+                - "deep"：对所有子查询运行 MCP，尽可能全面  
+                - "disabled"：完全禁用 MCP，仅使用网页检索器
         """
         self.kwargs = kwargs
         self.query = query
@@ -145,7 +145,7 @@ class GPTResearcher:
         self.log_handler = log_handler
         self.prompt_family = get_prompt_family(prompt_family or self.cfg.prompt_family, self.cfg)
         
-        # Process MCP configurations if provided
+        # 若提供了 MCP 配置则进行处理
         self.mcp_configs = mcp_configs
         if mcp_configs:
             self._process_mcp_configs(mcp_configs)
@@ -155,11 +155,11 @@ class GPTResearcher:
             self.cfg.embedding_provider, self.cfg.embedding_model, **self.cfg.embedding_kwargs
         )
         
-        # Set default encoding to utf-8
+        # 设置默认编码为 utf-8
         self.encoding = kwargs.get('encoding', 'utf-8')
-        self.kwargs.pop('encoding', None)  # Remove encoding from kwargs to avoid passing it to LLM calls
+        self.kwargs.pop('encoding', None)  # 从 kwargs 中移除 encoding，避免传给 LLM 调用
 
-        # Initialize components
+        # 初始化组件
         self.research_conductor: ResearchConductor = ResearchConductor(self)
         self.report_generator: ReportGenerator = ReportGenerator(self)
         self.context_manager: ContextManager = ContextManager(self)
@@ -169,49 +169,49 @@ class GPTResearcher:
         if report_type == ReportType.DeepResearch.value:
             self.deep_researcher = DeepResearchSkill(self)
 
-        # Handle MCP strategy configuration with backwards compatibility
+        # 处理 MCP 策略配置（兼容旧版本）
         self.mcp_strategy = self._resolve_mcp_strategy(mcp_strategy, mcp_max_iterations)
 
     def _resolve_mcp_strategy(self, mcp_strategy: str | None, mcp_max_iterations: int | None) -> str:
         """
-        Resolve MCP strategy from various sources with backwards compatibility.
+        从多个来源解析 MCP 策略并保持向后兼容。
         
-        Priority:
-        1. Parameter mcp_strategy (new approach)
-        2. Parameter mcp_max_iterations (backwards compatibility)  
-        3. Config MCP_STRATEGY
-        4. Default "fast"
+        优先级：
+        1. 参数 mcp_strategy（新方式）
+        2. 参数 mcp_max_iterations（向后兼容）  
+        3. 配置 MCP_STRATEGY
+        4. 默认 "fast"
         
         Args:
-            mcp_strategy: New strategy parameter
-            mcp_max_iterations: Legacy parameter for backwards compatibility
+            mcp_strategy: 新的策略参数
+            mcp_max_iterations: 旧参数（向后兼容）
             
         Returns:
-            str: Resolved strategy ("fast", "deep", or "disabled")
+            str: 解析后的策略（"fast"、"deep" 或 "disabled"）
         """
-        # Priority 1: Use mcp_strategy parameter if provided
+        # 优先级 1：如果提供了 mcp_strategy 参数则使用
         if mcp_strategy is not None:
-            # Support new strategy names
+            # 支持新策略名称
             if mcp_strategy in ["fast", "deep", "disabled"]:
                 return mcp_strategy
-            # Support old strategy names for backwards compatibility
+            # 兼容旧的策略名称
             elif mcp_strategy == "optimized":
                 import logging
-                logging.getLogger(__name__).warning("mcp_strategy 'optimized' is deprecated, use 'fast' instead")
+                logging.getLogger(__name__).warning("mcp_strategy 'optimized' 已弃用，请改用 'fast'")
                 return "fast"
             elif mcp_strategy == "comprehensive":
                 import logging
-                logging.getLogger(__name__).warning("mcp_strategy 'comprehensive' is deprecated, use 'deep' instead")
+                logging.getLogger(__name__).warning("mcp_strategy 'comprehensive' 已弃用，请改用 'deep'")
                 return "deep"
             else:
                 import logging
-                logging.getLogger(__name__).warning(f"Invalid mcp_strategy '{mcp_strategy}', defaulting to 'fast'")
+                logging.getLogger(__name__).warning(f"无效的 mcp_strategy '{mcp_strategy}'，将默认使用 'fast'")
                 return "fast"
         
-        # Priority 2: Convert mcp_max_iterations for backwards compatibility
+        # 优先级 2：将 mcp_max_iterations 转换为策略（向后兼容）
         if mcp_max_iterations is not None:
             import logging
-            logging.getLogger(__name__).warning("mcp_max_iterations is deprecated, use mcp_strategy instead")
+            logging.getLogger(__name__).warning("mcp_max_iterations 已弃用，请改用 mcp_strategy")
             
             if mcp_max_iterations == 0:
                 return "disabled"
@@ -220,55 +220,55 @@ class GPTResearcher:
             elif mcp_max_iterations == -1:
                 return "deep"
             else:
-                # Treat any other number as fast mode
+                # 其他数值一律按 fast 模式处理
                 return "fast"
         
-        # Priority 3: Use config setting
+        # 优先级 3：使用配置项
         if hasattr(self.cfg, 'mcp_strategy'):
             config_strategy = self.cfg.mcp_strategy
-            # Support new strategy names
+            # 支持新策略名称
             if config_strategy in ["fast", "deep", "disabled"]:
                 return config_strategy
-            # Support old strategy names for backwards compatibility
+            # 兼容旧的策略名称
             elif config_strategy == "optimized":
                 return "fast"
             elif config_strategy == "comprehensive":
                 return "deep"
             
-        # Priority 4: Default to fast
+        # 优先级 4：默认 fast
         return "fast"
 
     def _process_mcp_configs(self, mcp_configs: list[dict]) -> None:
         """
-        Process MCP configurations from a list of configuration dictionaries.
+        从配置字典列表中处理 MCP 配置。
         
-        This method validates the MCP configurations. It only adds MCP to retrievers
-        if no explicit retriever configuration is provided via environment variables.
+        该方法会校验 MCP 配置。仅在未通过环境变量显式配置检索器时，
+        才会将 MCP 加入检索器列表。
         
         Args:
-            mcp_configs (list[dict]): List of MCP server configuration dictionaries.
+            mcp_configs (list[dict]): MCP 服务器配置字典列表。
         """
-        # Check if user explicitly set RETRIEVER environment variable
+        # 检查用户是否显式设置了 RETRIEVER 环境变量
         user_set_retriever = os.getenv("RETRIEVER") is not None
         
         if not user_set_retriever:
-            # Only auto-add MCP if user hasn't explicitly set retrievers
+            # 仅在用户未显式设置检索器时自动添加 MCP
             if hasattr(self.cfg, 'retrievers') and self.cfg.retrievers:
-                # If retrievers is set in config (but not via env var)
+                # 如果在配置中设置了检索器（但不是通过环境变量）
                 current_retrievers = set(self.cfg.retrievers.split(",")) if isinstance(self.cfg.retrievers, str) else set(self.cfg.retrievers)
                 if "mcp" not in current_retrievers:
                     current_retrievers.add("mcp")
                     self.cfg.retrievers = ",".join(filter(None, current_retrievers))
             else:
-                # No retrievers configured, use mcp as default
+                # 未配置检索器时，默认使用 mcp
                 self.cfg.retrievers = "mcp"
-        # If user explicitly set RETRIEVER, respect their choice and don't auto-add MCP
+        # 若用户显式设置了 RETRIEVER，则尊重其选择，不自动添加 MCP
         
-        # Store the mcp_configs for use by the MCP retriever
+        # 保存 mcp_configs 供 MCP 检索器使用
         self.mcp_configs = mcp_configs
 
     async def _log_event(self, event_type: str, **kwargs):
-        """Helper method to handle logging events"""
+        """用于处理日志事件的辅助方法。"""
         if self.log_handler:
             try:
                 if event_type == "tool":
@@ -278,14 +278,14 @@ class GPTResearcher:
                 elif event_type == "research":
                     await self.log_handler.on_research_step(kwargs.get('step', ''), kwargs.get('details', {}))
 
-                # Add direct logging as backup
+                # 作为备用的直接日志输出
                 import logging
                 research_logger = logging.getLogger('research')
                 research_logger.info(f"{event_type}: {json.dumps(kwargs, default=str)}")
 
             except Exception as e:
                 import logging
-                logging.getLogger('research').error(f"Error in _log_event: {e}", exc_info=True)
+                logging.getLogger('research').error(f"_log_event 出错：{e}", exc_info=True)
 
     async def conduct_research(self, on_progress=None):
         await self._log_event("research", step="start", details={
@@ -295,13 +295,13 @@ class GPTResearcher:
             "role": self.role
         })
 
-        # Handle deep research separately
+        # 深度研究单独处理
         if self.report_type == ReportType.DeepResearch.value and self.deep_researcher:
             return await self._handle_deep_research(on_progress)
 
         if not (self.agent and self.role):
             await self._log_event("action", action="choose_agent")
-            # Filter out encoding parameter as it's not supported by LLM APIs
+            # 过滤 encoding 参数，LLM API 不支持该参数
             # filtered_kwargs = {k: v for k, v in self.kwargs.items() if k != 'encoding'}
             self.agent, self.role = await choose_agent(
                 query=self.query,
@@ -330,8 +330,8 @@ class GPTResearcher:
         return self.context
 
     async def _handle_deep_research(self, on_progress=None):
-        """Handle deep research execution and logging."""
-        # Log deep research configuration
+        """处理深度研究的执行与日志记录。"""
+        # 记录深度研究配置
         await self._log_event("research", step="deep_research_initialize", details={
             "type": "deep_research",
             "breadth": self.deep_researcher.breadth,
@@ -339,7 +339,7 @@ class GPTResearcher:
             "concurrency": self.deep_researcher.concurrency_limit
         })
 
-        # Log deep research start
+        # 记录深度研究开始
         await self._log_event("research", step="deep_research_start", details={
             "query": self.query,
             "breadth": self.deep_researcher.breadth,
@@ -347,27 +347,27 @@ class GPTResearcher:
             "concurrency": self.deep_researcher.concurrency_limit
         })
 
-        # Run deep research and get context
+        # 运行深度研究并获取上下文
         self.context = await self.deep_researcher.run(on_progress=on_progress)
 
-        # Get total research costs
+        # 获取总研究成本
         total_costs = self.get_costs()
 
-        # Log deep research completion with costs
+        # 记录深度研究完成与成本
         await self._log_event("research", step="deep_research_complete", details={
             "context_length": len(self.context),
             "visited_urls": len(self.visited_urls),
             "total_costs": total_costs
         })
 
-        # Log final cost update
+        # 记录最终成本更新
         await self._log_event("research", step="cost_update", details={
             "cost": total_costs,
             "total_cost": total_costs,
             "research_type": "deep_research"
         })
 
-        # Return the research context
+        # 返回研究上下文
         return self.context
 
     async def write_report(self, existing_headers: list = [], relevant_written_contents: list = [], ext_context=None, custom_prompt="") -> str:
@@ -423,7 +423,7 @@ class GPTResearcher:
             max_results
         )
 
-    # Utility methods
+    # 工具方法
     def get_research_images(self, top_k=10) -> list[dict[str, Any]]:
         return self.research_images[:top_k]
 
@@ -462,7 +462,7 @@ class GPTResearcher:
 
     def add_costs(self, cost: float) -> None:
         if not isinstance(cost, (float, int)):
-            raise ValueError("Cost must be an integer or float")
+            raise ValueError("Cost 必须是整数或浮点数")
         self.research_costs += cost
         if self.log_handler:
             self._log_event("research", step="cost_update", details={

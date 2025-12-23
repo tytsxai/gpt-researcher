@@ -1,11 +1,11 @@
 """
-MCP (Model Context Protocol) Integration for GPT Researcher
+GPT Researcher 的 MCP（Model Context Protocol）集成
 
-This module provides comprehensive MCP integration including:
-- Client management for MCP servers
-- Tool selection and execution
-- Research execution with MCP tools
-- Streaming support for real-time updates
+本模块提供完整的 MCP 集成能力，包括：
+- MCP 服务器客户端管理
+- 工具选择与执行
+- 使用 MCP 工具进行研究执行
+- 实时更新的流式支持
 """
 
 import logging
@@ -13,12 +13,12 @@ import logging
 logger = logging.getLogger(__name__)
 
 try:
-    # Check if langchain-mcp-adapters is available
+    # 检查 langchain-mcp-adapters 是否可用
     from langchain_mcp_adapters.client import MultiServerMCPClient
     HAS_MCP_ADAPTERS = True
-    logger.debug("langchain-mcp-adapters is available")
+    logger.debug("langchain-mcp-adapters 可用")
     
-    # Import core MCP components
+    # 导入 MCP 核心组件
     from .client import MCPClientManager
     from .tool_selector import MCPToolSelector
     from .research import MCPResearchSkill
@@ -33,11 +33,11 @@ try:
     ]
     
 except ImportError as e:
-    logger.warning(f"MCP dependencies not available: {e}")
+    logger.warning(f"MCP 依赖不可用: {e}")
     HAS_MCP_ADAPTERS = False
     __all__ = ["HAS_MCP_ADAPTERS"]
     
 except Exception as e:
-    logger.error(f"Unexpected error importing MCP components: {e}")
+    logger.error(f"导入 MCP 组件时发生意外错误: {e}")
     HAS_MCP_ADAPTERS = False
     __all__ = ["HAS_MCP_ADAPTERS"] 

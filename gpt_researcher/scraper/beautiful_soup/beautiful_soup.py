@@ -38,5 +38,5 @@ class BeautifulSoupScraper:
             return content, image_urls, title
 
         except Exception as e:
-            print("Error! : " + str(e))
+            print("错误！: " + str(e))
             return "", [], ""

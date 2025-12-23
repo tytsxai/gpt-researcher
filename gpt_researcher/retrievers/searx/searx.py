@@ -7,13 +7,13 @@ from urllib.parse import urljoin
 
 class SearxSearch():
     """
-    SearxNG API Retriever
+    SearxNG API 检索器
     """
     def __init__(self, query: str, query_domains=None):
         """
-        Initializes the SearxSearch object
+        初始化 SearxSearch 对象
         Args:
-            query: Search query string
+            query: 搜索查询字符串
         """
         self.query = query
         self.query_domains = query_domains or None
@@ -21,9 +21,9 @@ class SearxSearch():
 
     def get_searxng_url(self) -> str:
         """
-        Gets the SearxNG instance URL from environment variables
+        从环境变量中获取 SearxNG 实例 URL
         Returns:
-            str: Base URL of SearxNG instance
+            str: SearxNG 实例的基础 URL
         """
         try:
             base_url = os.environ["SEARX_URL"]
@@ -32,24 +32,24 @@ class SearxSearch():
             return base_url
         except KeyError:
             raise Exception(
-                "SearxNG URL not found. Please set the SEARX_URL environment variable. "
-                "You can find public instances at https://searx.space/"
+                "未找到 SearxNG URL。请设置 SEARX_URL 环境变量。"
+                "可在 https://searx.space/ 查找公共实例。"
             )
 
     def search(self, max_results: int = 10) -> List[Dict[str, str]]:
         """
-        Searches the query using SearxNG API
+        使用 SearxNG API 搜索查询
         Args:
-            max_results: Maximum number of results to return
+            max_results: 返回结果的最大数量
         Returns:
-            List of dictionaries containing search results
+            包含搜索结果的字典列表
         """
         search_url = urljoin(self.base_url, "search")
-        # TODO: Add support for query domains
+        # TODO: 添加对查询域名的支持
         params = {
-            # The search query. 
-            'q': self.query, 
-            # Output format of results. Format needs to be activated in searxng config.
+            # 搜索查询。
+            'q': self.query,
+            # 结果输出格式，需要在 searxng 配置中启用。
             'format': 'json'
         }
 
@@ -62,7 +62,7 @@ class SearxSearch():
             response.raise_for_status()
             results = response.json()
 
-            # Normalize results to match the expected format
+            # 规范化结果以匹配预期格式
             search_response = []
             for result in results.get('results', [])[:max_results]:
                 search_response.append({
@@ -73,6 +73,6 @@ class SearxSearch():
             return search_response
 
         except requests.exceptions.RequestException as e:
-            raise Exception(f"Error querying SearxNG: {str(e)}")
+            raise Exception(f"查询 SearxNG 出错：{str(e)}")
         except json.JSONDecodeError:
-            raise Exception("Error parsing SearxNG response")
+            raise Exception("解析 SearxNG 响应出错")

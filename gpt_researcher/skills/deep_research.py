@@ -103,7 +103,7 @@ class DeepResearchSkill:
             self.researcher.retrievers[0],
             researcher=self.researcher
         )
-        logger.info(f"Initial web knowledge obtained: {len(search_results)} results")
+        logger.info(f"已获取初始网络知识: {len(search_results)} 条结果")
 
         # Get current time for context
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -199,7 +199,7 @@ Format each question on a new line starting with 'Question: '"""}
             on_progress=None
     ) -> Dict[str, Any]:
         """Conduct deep iterative research"""
-        print(f"\n📊 DEEP RESEARCH: depth={depth}, breadth={breadth}, query={query[:100]}...", flush=True)
+        print(f"\n📊 深度研究: depth={depth}, breadth={breadth}, query={query[:100]}...", flush=True)
         if learnings is None:
             learnings = []
         if citations is None:
@@ -213,9 +213,9 @@ Format each question on a new line starting with 'Question: '"""}
             on_progress(progress)
 
         # Generate search queries
-        print(f"🔎 Generating {breadth} search queries...", flush=True)
+        print(f"🔎 正在生成 {breadth} 个搜索查询...", flush=True)
         serp_queries = await self.generate_search_queries(query, num_queries=breadth)
-        print(f"✅ Generated {len(serp_queries)} queries: {[q['query'] for q in serp_queries]}", flush=True)
+        print(f"✅ 已生成 {len(serp_queries)} 个查询: {[q['query'] for q in serp_queries]}", flush=True)
         progress.total_queries = len(serp_queries)
 
         all_learnings = learnings.copy()
@@ -281,8 +281,8 @@ Format each question on a new line starting with 'Question: '"""}
                 except Exception as e:
                     import traceback
                     error_details = traceback.format_exc()
-                    logger.error(f"Error processing query '{serp_query['query']}': {str(e)}")
-                    print(f"\n❌ DEEP RESEARCH ERROR: {str(e)}\n{error_details}", flush=True)
+                    logger.error(f"处理查询 '{serp_query['query']}' 出错: {str(e)}")
+                    print(f"\n❌ 深度研究出错: {str(e)}\n{error_details}", flush=True)
                     return None
 
         # Process queries concurrently with limit
@@ -342,7 +342,7 @@ Format each question on a new line starting with 'Question: '"""}
 
         # Trim context to stay within word limits
         trimmed_context = trim_context_to_word_limit(all_context)
-        logger.info(f"Trimmed context from {len(all_context)} items to {len(trimmed_context)} items to stay within word limit")
+        logger.info(f"为控制词数已将上下文从 {len(all_context)} 条裁剪到 {len(trimmed_context)} 条")
 
         return {
             'learnings': list(set(all_learnings)),
@@ -354,7 +354,7 @@ Format each question on a new line starting with 'Question: '"""}
 
     async def run(self, on_progress=None) -> str:
         """Run the deep research process and generate final report"""
-        print(f"\n🔍 DEEP RESEARCH: Starting with breadth={self.breadth}, depth={self.depth}, concurrency={self.concurrency_limit}", flush=True)
+        print(f"\n🔍 深度研究: breadth={self.breadth}, depth={self.depth}, concurrency={self.concurrency_limit}，开始执行", flush=True)
         start_time = time.time()
 
         # Log initial costs
@@ -412,8 +412,8 @@ Format each question on a new line starting with 'Question: '"""}
         # Log total execution time
         end_time = time.time()
         execution_time = timedelta(seconds=end_time - start_time)
-        logger.info(f"Total research execution time: {execution_time}")
-        logger.info(f"Total research costs: ${research_costs:.2f}")
+        logger.info(f"总研究执行时间: {execution_time}")
+        logger.info(f"研究总成本: ${research_costs:.2f}")
 
         # Return the context - don't generate report here as it will be done by the main agent
         return self.researcher.context

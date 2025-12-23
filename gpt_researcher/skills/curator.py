@@ -27,12 +27,12 @@ class SourceCurator:
         Returns:
             str: Ranked list of source URLs with reasoning
         """
-        print(f"\n\nCurating {len(source_data)} sources: {source_data}")
+        print(f"\n\n正在整理 {len(source_data)} 个来源: {source_data}")
         if self.researcher.verbose:
             await stream_output(
                 "logs",
                 "research_plan",
-                f"⚖️ Evaluating and curating sources by credibility and relevance...",
+                f"⚖️ 正在根据可信度和相关性评估和整理来源...",
                 self.researcher.websocket,
             )
 
@@ -53,25 +53,25 @@ class SourceCurator:
             )
 
             curated_sources = json.loads(response)
-            print(f"\n\nFinal Curated sources {len(source_data)} sources: {curated_sources}")
+            print(f"\n\n最终整理的 {len(source_data)} 个来源: {curated_sources}")
 
             if self.researcher.verbose:
                 await stream_output(
                     "logs",
                     "research_plan",
-                    f"🏅 Verified and ranked top {len(curated_sources)} most reliable sources",
+                    f"🏅 已验证并排序前 {len(curated_sources)} 个最可靠的来源",
                     self.researcher.websocket,
                 )
 
             return curated_sources
 
         except Exception as e:
-            print(f"Error in curate_sources from LLM response: {response}")
+            print(f"从 LLM 响应整理来源时出错: {response}")
             if self.researcher.verbose:
                 await stream_output(
                     "logs",
                     "research_plan",
-                    f"🚫 Source verification failed: {str(e)}",
+                    f"🚫 来源验证失败: {str(e)}",
                     self.researcher.websocket,
                 )
             return source_data

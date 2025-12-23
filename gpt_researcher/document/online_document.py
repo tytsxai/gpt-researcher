@@ -29,7 +29,7 @@ class OnlineDocumentLoader:
                     })
 
         if not docs:
-            raise ValueError("🤷 Failed to load any documents!")
+            raise ValueError("🤷 未能加载任何文档！")
 
         return docs
 
@@ -41,7 +41,7 @@ class OnlineDocumentLoader:
             async with aiohttp.ClientSession() as session:
                 async with session.get(url, headers=headers, timeout=6) as response:
                     if response.status != 200:
-                        print(f"Failed to download {url}: HTTP {response.status}")
+                        print(f"下载失败 {url}：HTTP {response.status}")
                         return []
 
                     content = await response.read()
@@ -51,11 +51,11 @@ class OnlineDocumentLoader:
 
                     return await self._load_document(tmp_file_path, self._get_extension(url).strip('.'))
         except aiohttp.ClientError as e:
-            print(f"Failed to process {url}")
+            print(f"处理失败 {url}")
             print(e)
             return []
         except Exception as e:
-            print(f"Unexpected error processing {url}")
+            print(f"处理 {url} 时发生意外错误")
             print(e)
             return []
 
@@ -79,7 +79,7 @@ class OnlineDocumentLoader:
                 ret_data = loader.load()
 
         except Exception as e:
-            print(f"Failed to load document : {file_path}")
+            print(f"加载文档失败：{file_path}")
             print(e)
         finally:
             os.remove(file_path)  # 删除临时文件

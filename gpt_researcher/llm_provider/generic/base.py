@@ -10,6 +10,8 @@ from colorama import Fore, Style, init
 import os
 from enum import Enum
 
+from gpt_researcher.utils.openai_base_url import normalize_openai_base_url
+
 _SUPPORTED_PROVIDERS = {
     "openai",
     "anthropic",
@@ -48,7 +50,7 @@ NO_SUPPORT_TEMPERATURE_MODELS = [
     "o3-2025-04-16",
     "o4-mini",
     "o4-mini-2025-04-16",
-    # GPT-5 family: OpenAI enforces default temperature only
+    # GPT-5 系列：OpenAI 仅允许默认 temperature
     "gpt-5",
     "gpt-5-mini",
 ]
@@ -69,9 +71,7 @@ class ReasoningEfforts(Enum):
 
 
 class ChatLogger:
-    """Helper utility to log all chat requests and their corresponding responses
-    plus the stack trace leading to the call.
-    """
+    """用于记录所有聊天请求及其对应响应，并保存调用栈跟踪。"""
 
     def __init__(self, fname: str):
         self.fname = fname
@@ -98,9 +98,9 @@ class GenericLLMProvider:
             _check_pkg("langchain_openai")
             from langchain_openai import ChatOpenAI
 
-            # Support custom OpenAI-compatible APIs via OPENAI_BASE_URL
+            # 通过 OPENAI_BASE_URL 支持自定义 OpenAI 兼容 API
             if "openai_api_base" not in kwargs and os.environ.get("OPENAI_BASE_URL"):
-                kwargs["openai_api_base"] = os.environ["OPENAI_BASE_URL"]
+                kwargs["openai_api_base"] = normalize_openai_base_url(os.environ["OPENAI_BASE_URL"])
 
             llm = ChatOpenAI(**kwargs)
         elif provider == "anthropic":
@@ -249,14 +249,14 @@ class GenericLLMProvider:
         else:
             supported = ", ".join(_SUPPORTED_PROVIDERS)
             raise ValueError(
-                f"Unsupported {provider}.\n\nSupported model providers are: {supported}"
+                f"不支持 {provider}。\n\n可用的模型提供方：{supported}"
             )
         return cls(llm, chat_log, verbose=verbose)
 
 
     async def get_chat_response(self, messages, stream, websocket=None, **kwargs):
         if not stream:
-            # Getting output from the model chain using ainvoke for asynchronous invoking
+            # 使用 ainvoke 异步从模型链获取输出
             output = await self.llm.ainvoke(messages, **kwargs)
 
             res = output.content
@@ -273,7 +273,7 @@ class GenericLLMProvider:
         paragraph = ""
         response = ""
 
-        # Streaming the response using the chain astream method from langchain
+        # 使用 langchain 的 astream 方法流式输出响应
         async for chunk in self.llm.astream(messages, **kwargs):
             content = chunk.content
             if content is not None:
@@ -298,19 +298,19 @@ class GenericLLMProvider:
 def _check_pkg(pkg: str) -> None:
     if not importlib.util.find_spec(pkg):
         pkg_kebab = pkg.replace("_", "-")
-        # Import colorama and initialize it
+        # 导入并初始化 colorama
         init(autoreset=True)
 
         try:
-            print(f"{Fore.YELLOW}Installing {pkg_kebab}...{Style.RESET_ALL}")
+            print(f"{Fore.YELLOW}正在安装 {pkg_kebab}...{Style.RESET_ALL}")
             subprocess.check_call([sys.executable, "-m", "pip", "install", "-U", pkg_kebab])
-            print(f"{Fore.GREEN}Successfully installed {pkg_kebab}{Style.RESET_ALL}")
+            print(f"{Fore.GREEN}已成功安装 {pkg_kebab}{Style.RESET_ALL}")
 
-            # Try importing again after install
+            # 安装后再次尝试导入
             importlib.import_module(pkg)
 
         except subprocess.CalledProcessError:
             raise ImportError(
-                Fore.RED + f"Failed to install {pkg_kebab}. Please install manually with "
+                Fore.RED + f"安装 {pkg_kebab} 失败。请手动安装："
                 f"`pip install -U {pkg_kebab}`"
             )

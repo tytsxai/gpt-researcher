@@ -37,7 +37,7 @@ class DocumentLoader:
                     tasks.append(self._load_document(file_path, file_extension))
                     
         else:
-            raise ValueError("Invalid type for path. Expected str, bytes, os.PathLike, or list thereof.")
+            raise ValueError("路径类型无效。应为 str、bytes、os.PathLike 或它们的列表。")
 
         # for root, dirs, files in os.walk(self.path):
         #     for file in files:
@@ -56,7 +56,7 @@ class DocumentLoader:
                     })
                     
         if not docs:
-            raise ValueError("🤷 Failed to load any documents!")
+            raise ValueError("🤷 未能加载任何文档！")
 
         return docs
 
@@ -82,11 +82,11 @@ class DocumentLoader:
                 try:
                     ret_data = loader.load()
                 except Exception as e:
-                    print(f"Failed to load HTML document : {file_path}")
+                    print(f"加载 HTML 文档失败：{file_path}")
                     print(e)
 
         except Exception as e:
-            print(f"Failed to load document : {file_path}")
+            print(f"加载文档失败：{file_path}")
             print(e)
 
         return ret_data

@@ -44,7 +44,7 @@ def get_relevant_images(soup: BeautifulSoup, url: str) -> list:
         return sorted_images[:10]  # Ensure we don't return more than 10 images in total
     
     except Exception as e:
-        logging.error(f"Error in get_relevant_images: {e}")
+        logging.error(f"获取相关图片时出错: {e}")
         return []
 
 def parse_dimension(value: str) -> int:
@@ -54,7 +54,7 @@ def parse_dimension(value: str) -> int:
     try:
         return int(value)  # Convert to float first to handle decimal values
     except ValueError as e:
-        print(f"Error parsing dimension value {value}: {e}")
+        print(f"解析尺寸值 {value} 时出错: {e}")
         return None
 
 def extract_title(soup: BeautifulSoup) -> str:
@@ -79,7 +79,7 @@ def get_image_hash(image_url: str) -> str:
         # Calculate hash
         return hashlib.md5(image_identifier.encode()).hexdigest()
     except Exception as e:
-        logging.error(f"Error calculating image hash for {image_url}: {e}")
+        logging.error(f"计算图片哈希值时出错 {image_url}: {e}")
         return None
 
 

@@ -20,7 +20,7 @@ class FireCrawl:
             api_key = os.environ["FIRECRAWL_API_KEY"]
         except KeyError:
             raise Exception(
-                "FireCrawl API key not found. Please set the FIRECRAWL_API_KEY environment variable.")
+                "未找到 FireCrawl API key。请设置 FIRECRAWL_API_KEY 环境变量。")
         return api_key
 
     def get_server_url(self) -> str:
@@ -55,10 +55,10 @@ class FireCrawl:
             # Check if the page has been scraped successfully
             # Fixed: Access metadata attributes directly (not as dict keys)
             if response.metadata and response.metadata.error:
-                print("Scrape failed! : " + str(response.metadata.error))
+                print("抓取失败！: " + str(response.metadata.error))
                 return "", [], ""
             elif response.metadata and response.metadata.status_code and response.metadata.status_code != 200:
-                print(f"Scrape failed! Status code: {response.metadata.status_code}")
+                print(f"抓取失败！状态码: {response.metadata.status_code}")
                 return "", [], ""
 
             # Extract the content (markdown) and title from FireCrawl response
@@ -78,5 +78,5 @@ class FireCrawl:
             return content, image_urls, title
 
         except Exception as e:
-            print("Error! : " + str(e))
+            print("错误！: " + str(e))
             return "", [], ""

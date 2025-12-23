@@ -24,6 +24,6 @@ class Duckduckgo:
         try:
             search_response = self.ddg.text(self.query, region='wt-wt', max_results=max_results)
         except Exception as e:
-            print(f"Error: {e}. Failed fetching sources. Resulting in empty response.")
+            print(f"错误: {e}。获取来源失败。返回空响应。")
             search_response = []
         return search_response

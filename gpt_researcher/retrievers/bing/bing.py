@@ -33,7 +33,7 @@ class BingSearch():
             api_key = os.environ["BING_API_KEY"]
         except:
             raise Exception(
-                "Bing API key not found. Please set the BING_API_KEY environment variable.")
+                "未找到 Bing API 密钥。请设置 BING_API_KEY 环境变量。")
         return api_key
 
     def search(self, max_results=7) -> list[dict[str]]:
@@ -42,7 +42,7 @@ class BingSearch():
         Returns:
 
         """
-        print("Searching with query {0}...".format(self.query))
+        print("正在使用查询 {0} 进行搜索...".format(self.query))
         """Useful for general internet search queries using the Bing API."""
 
         # Search the query
@@ -73,10 +73,10 @@ class BingSearch():
             results = search_results["webPages"]["value"]
         except Exception as e:
             self.logger.error(
-                f"Error parsing Bing search results: {e}. Resulting in empty response.")
+                f"解析 Bing 搜索结果时出错: {e}。返回空响应。")
             return []
         if search_results is None:
-            self.logger.warning(f"No search results found for query: {self.query}")
+            self.logger.warning(f"未找到查询的搜索结果: {self.query}")
             return []
         search_results = []
 

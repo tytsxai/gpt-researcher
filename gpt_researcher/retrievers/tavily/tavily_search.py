@@ -1,6 +1,6 @@
-# Tavily API Retriever
+# Tavily API 检索器
 
-# libraries
+# 依赖库
 import os
 from typing import Literal, Sequence, Optional
 import requests
@@ -9,18 +9,18 @@ import json
 
 class TavilySearch:
     """
-    Tavily API Retriever
+    Tavily API 检索器
     """
 
     def __init__(self, query, headers=None, topic="general", query_domains=None):
         """
-        Initializes the TavilySearch object.
+        初始化 TavilySearch 对象。
 
         Args:
-            query (str): The search query string.
-            headers (dict, optional): Additional headers to include in the request. Defaults to None.
-            topic (str, optional): The topic for the search. Defaults to "general".
-            query_domains (list, optional): List of domains to include in the search. Defaults to None.
+            query (str): 搜索查询字符串。
+            headers (dict, optional): 要包含在请求中的额外请求头。默认为 None。
+            topic (str, optional): 搜索主题。默认为 "general"。
+            query_domains (list, optional): 要包含在搜索中的域名列表。默认为 None。
         """
         self.query = query
         self.headers = headers or {}
@@ -34,7 +34,7 @@ class TavilySearch:
 
     def get_api_key(self):
         """
-        Gets the Tavily API key
+        获取 Tavily API 密钥
         Returns:
 
         """
@@ -44,7 +44,7 @@ class TavilySearch:
                 api_key = os.environ["TAVILY_API_KEY"]
             except KeyError:
                 print(
-                    "Tavily API key not found, set to blank. If you need a retriver, please set the TAVILY_API_KEY environment variable."
+                    "未找到 Tavily API 密钥，设置为空。如果您需要检索器，请设置 TAVILY_API_KEY 环境变量。"
                 )
                 return ""
         return api_key
@@ -65,7 +65,7 @@ class TavilySearch:
         use_cache: bool = True,
     ) -> dict:
         """
-        Internal search method to send the request to the API.
+        向 API 发送请求的内部搜索方法。
         """
 
         data = {
@@ -90,17 +90,17 @@ class TavilySearch:
         if response.status_code == 200:
             return response.json()
         else:
-            # Raises a HTTPError if the HTTP request returned an unsuccessful status code
+            # 如果 HTTP 请求返回非成功状态码，则抛出 HTTPError
             response.raise_for_status()
 
     def search(self, max_results=10):
         """
-        Searches the query
+        搜索查询
         Returns:
 
         """
         try:
-            # Search the query
+            # 执行搜索查询
             results = self._search(
                 self.query,
                 search_depth="basic",
@@ -110,12 +110,12 @@ class TavilySearch:
             )
             sources = results.get("results", [])
             if not sources:
-                raise Exception("No results found with Tavily API search.")
-            # Return the results
+                raise Exception("使用 Tavily API 搜索未找到结果。")
+            # 返回结果
             search_response = [
                 {"href": obj["url"], "body": obj["content"]} for obj in sources
             ]
         except Exception as e:
-            print(f"Error: {e}. Failed fetching sources. Resulting in empty response.")
+            print(f"错误：{e}。获取来源失败，返回空结果。")
             search_response = []
         return search_response

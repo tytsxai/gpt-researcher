@@ -1,7 +1,7 @@
 """
-MCP Client Management Module
+MCP 客户端管理模块
 
-Handles MCP client creation, configuration conversion, and connection management.
+处理 MCP 客户端创建、配置转换与连接管理。
 """
 import asyncio
 import logging
@@ -18,20 +18,20 @@ logger = logging.getLogger(__name__)
 
 class MCPClientManager:
     """
-    Manages MCP client lifecycle and configuration.
-    
-    Responsible for:
-    - Converting GPT Researcher MCP configs to langchain format
-    - Creating and managing MultiServerMCPClient instances
-    - Handling client cleanup and resource management
+    管理 MCP 客户端的生命周期与配置。
+
+    负责：
+    - 将 GPT Researcher 的 MCP 配置转换为 langchain 格式
+    - 创建并管理 MultiServerMCPClient 实例
+    - 处理客户端清理与资源管理
     """
 
     def __init__(self, mcp_configs: List[Dict[str, Any]]):
         """
-        Initialize the MCP client manager.
-        
+        初始化 MCP 客户端管理器。
+
         Args:
-            mcp_configs: List of MCP server configurations from GPT Researcher
+            mcp_configs: 来自 GPT Researcher 的 MCP 服务器配置列表
         """
         self.mcp_configs = mcp_configs or []
         self._client = None
@@ -39,21 +39,21 @@ class MCPClientManager:
 
     def convert_configs_to_langchain_format(self) -> Dict[str, Dict[str, Any]]:
         """
-        Convert GPT Researcher MCP configs to langchain-mcp-adapters format.
-        
+        将 GPT Researcher 的 MCP 配置转换为 langchain-mcp-adapters 格式。
+
         Returns:
-            Dict[str, Dict[str, Any]]: Server configurations for MultiServerMCPClient
+            Dict[str, Dict[str, Any]]: 供 MultiServerMCPClient 使用的服务器配置
         """
         server_configs = {}
         
         for i, config in enumerate(self.mcp_configs):
-            # Generate server name
+            # 生成服务器名称
             server_name = config.get("name", f"mcp_server_{i+1}")
             
-            # Build the server config
+            # 构建服务器配置
             server_config = {}
             
-            # Auto-detect transport type from URL if provided
+            # 如果提供了 URL，则自动检测传输类型
             connection_url = config.get("connection_url")
             if connection_url:
                 if connection_url.startswith(("wss://", "ws://")):
@@ -63,33 +63,33 @@ class MCPClientManager:
                     server_config["transport"] = "streamable_http"
                     server_config["url"] = connection_url
                 else:
-                    # Fallback to specified connection_type or stdio
+                    # 回退到指定的 connection_type 或 stdio
                     connection_type = config.get("connection_type", "stdio")
                     server_config["transport"] = connection_type
                     if connection_type in ["websocket", "streamable_http", "http"]:
                         server_config["url"] = connection_url
             else:
-                # No URL provided, use stdio (default) or specified connection_type
+                # 未提供 URL，使用 stdio（默认）或指定的 connection_type
                 connection_type = config.get("connection_type", "stdio")
                 server_config["transport"] = connection_type
             
-            # Handle stdio transport configuration
+            # 处理 stdio 传输配置
             if server_config.get("transport") == "stdio":
                 if config.get("command"):
                     server_config["command"] = config["command"]
                     
-                    # Handle server_args
+                    # 处理 server_args
                     server_args = config.get("args", [])
                     if isinstance(server_args, str):
                         server_args = server_args.split()
                     server_config["args"] = server_args
                     
-                    # Handle environment variables
+                    # 处理环境变量
                     server_env = config.get("env", {})
                     if server_env:
                         server_config["env"] = server_env
                         
-            # Add authentication if provided
+            # 如有提供则添加认证信息
             if config.get("connection_token"):
                 server_config["token"] = config["connection_token"]
                 
@@ -99,76 +99,75 @@ class MCPClientManager:
 
     async def get_or_create_client(self) -> Optional[object]:
         """
-        Get or create a MultiServerMCPClient with proper lifecycle management.
-        
+        获取或创建 MultiServerMCPClient，并进行正确的生命周期管理。
+
         Returns:
-            MultiServerMCPClient: The client instance or None if creation fails
+            MultiServerMCPClient: 客户端实例；若创建失败则为 None
         """
         async with self._client_lock:
             if self._client is not None:
                 return self._client
                 
             if not HAS_MCP_ADAPTERS:
-                logger.error("langchain-mcp-adapters not installed")
+                logger.error("langchain-mcp-adapters 未安装")
                 return None
                 
             if not self.mcp_configs:
-                logger.error("No MCP server configurations found")
+                logger.error("未找到 MCP 服务器配置")
                 return None
                 
             try:
-                # Convert configs to langchain format
+                # 将配置转换为 langchain 格式
                 server_configs = self.convert_configs_to_langchain_format()
-                logger.info(f"Creating MCP client for {len(server_configs)} server(s)")
+                logger.info(f"正在为 {len(server_configs)} 个服务器创建 MCP 客户端")
                 
-                # Initialize the MultiServerMCPClient
+                # 初始化 MultiServerMCPClient
                 self._client = MultiServerMCPClient(server_configs)
                 
                 return self._client
                 
             except Exception as e:
-                logger.error(f"Error creating MCP client: {e}")
+                logger.error(f"创建 MCP 客户端时出错: {e}")
                 return None
 
     async def close_client(self):
         """
-        Properly close the MCP client and clean up resources.
+        正确关闭 MCP 客户端并清理资源。
         """
         async with self._client_lock:
             if self._client is not None:
                 try:
-                    # Since MultiServerMCPClient doesn't support context manager
-                    # or explicit close methods in langchain-mcp-adapters 0.1.0,
-                    # we just clear the reference and let garbage collection handle it
-                    logger.debug("Releasing MCP client reference")
+                    # 由于 langchain-mcp-adapters 0.1.0 中的 MultiServerMCPClient
+                    # 不支持上下文管理器或显式关闭方法，这里仅清除引用并交由 GC 处理
+                    logger.debug("释放 MCP 客户端引用")
                 except Exception as e:
-                    logger.error(f"Error during MCP client cleanup: {e}")
+                    logger.error(f"清理 MCP 客户端时出错: {e}")
                 finally:
-                    # Always clear the reference
+                    # 始终清除引用
                     self._client = None
 
     async def get_all_tools(self) -> List:
         """
-        Get all available tools from MCP servers.
-        
+        获取 MCP 服务器中所有可用工具。
+
         Returns:
-            List: All available MCP tools
+            List: 所有可用的 MCP 工具
         """
         client = await self.get_or_create_client()
         if not client:
             return []
             
         try:
-            # Get tools from all servers
+            # 从所有服务器获取工具
             all_tools = await client.get_tools()
             
             if all_tools:
-                logger.info(f"Loaded {len(all_tools)} total tools from MCP servers")
+                logger.info(f"从 MCP 服务器加载了 {len(all_tools)} 个工具")
                 return all_tools
             else:
-                logger.warning("No tools available from MCP servers")
+                logger.warning("MCP 服务器没有可用的工具")
                 return []
                 
         except Exception as e:
-            logger.error(f"Error getting MCP tools: {e}")
+            logger.error(f"获取 MCP 工具时出错: {e}")
             return [] 

@@ -93,14 +93,14 @@ class NoDriverScraper:
                     await page.wait_for_ready_state(until, timeout=timeout)
             except asyncio.TimeoutError:
                 NoDriverScraper.logger.debug(
-                    f"timeout waiting for {until} after {timeout} seconds"
+                    f"等待 {until} 超时，已等待 {timeout} 秒"
                 )
 
         async def close_page(self, page: "zendriver.Tab"):
             try:
                 await page.close()
             except Exception as e:
-                NoDriverScraper.logger.error(f"Failed to close page: {e}")
+                NoDriverScraper.logger.error(f"关闭页面失败: {e}")
             finally:
                 self.processing_count -= 1
 
@@ -124,7 +124,7 @@ class NoDriverScraper:
             except Exception as e:
                 # Log error but don't block the request
                 NoDriverScraper.logger.warning(
-                    f"Rate limiting error for {url}: {str(e)}"
+                    f"{url} 的限速处理出错: {str(e)}"
                 )
 
         async def stop(self):
@@ -141,8 +141,8 @@ class NoDriverScraper:
                 import zendriver
             except ImportError:
                 raise ImportError(
-                    "The zendriver package is required to use NoDriverScraper. "
-                    "Please install it with: pip install zendriver"
+                    "使用 NoDriverScraper 需要 zendriver 包。"
+                    "请使用以下命令安装: pip install zendriver"
                 )
 
             config = zendriver.Config(
@@ -178,7 +178,7 @@ class NoDriverScraper:
                 try:
                     await browser.stop()
                 except Exception as e:
-                    NoDriverScraper.logger.error(f"Failed to release browser: {e}")
+                    NoDriverScraper.logger.error(f"释放浏览器失败: {e}")
                 finally:
                     cls.browsers.discard(browser)
 
@@ -191,7 +191,7 @@ class NoDriverScraper:
         """Returns tuple of (text, image_urls, title)"""
         if not self.url:
             return (
-                "A URL was not specified, cancelling request to browse website.",
+                "未指定 URL，已取消浏览网站请求。",
                 [],
                 "",
             )
@@ -202,7 +202,7 @@ class NoDriverScraper:
             try:
                 browser = await self.get_browser()
             except ImportError as e:
-                self.logger.error(f"Failed to initialize browser: {str(e)}")
+                self.logger.error(f"初始化浏览器失败: {str(e)}")
                 return str(e), [], ""
 
             page = await browser.get(self.url)
@@ -221,8 +221,8 @@ class NoDriverScraper:
 
             if len(text) < 200:
                 self.logger.warning(
-                    f"Content is too short from {self.url}. Title: {title}, Text length: {len(text)},\n"
-                    f"excerpt: {text}."
+                    f"{self.url} 的内容过短。标题: {title}，文本长度: {len(text)}，\n"
+                    f"摘录: {text}。"
                 )
                 if self.debug:
                     screenshot_dir = Path("logs/screenshots")
@@ -233,14 +233,14 @@ class NoDriverScraper:
                     )
                     await page.save_screenshot(screenshot_path)
                     self.logger.warning(
-                        f"check screenshot at [{screenshot_path}] for more details."
+                        f"更多详情请查看截图: [{screenshot_path}]。"
                     )
 
             return text, image_urls, title
         except Exception as e:
             self.logger.error(
-                f"An error occurred during scraping: {str(e)}\n"
-                "Full stack trace:\n"
+                f"抓取过程中发生错误: {str(e)}\n"
+                "完整堆栈跟踪:\n"
                 f"{traceback.format_exc()}"
             )
             return str(e), [], ""

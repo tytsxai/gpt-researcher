@@ -11,23 +11,23 @@ logger = logging.getLogger(__name__)
 
 async def get_search_results(query: str, retriever: Any, query_domains: List[str] = None, researcher=None) -> List[Dict[str, Any]]:
     """
-    Get web search results for a given query.
+    获取给定查询的网页搜索结果。
 
-    Args:
-        query: The search query
-        retriever: The retriever instance
-        query_domains: Optional list of domains to search
-        researcher: The researcher instance (needed for MCP retrievers)
+    参数:
+        query: 搜索查询
+        retriever: 检索器实例
+        query_domains: 可选的搜索域名列表
+        researcher: 研究器实例（MCP 检索器需要）
 
-    Returns:
-        A list of search results
+    返回:
+        搜索结果列表
     """
-    # Check if this is an MCP retriever and pass the researcher instance
+    # 检查是否为 MCP 检索器并传入 researcher 实例
     if "mcpretriever" in retriever.__name__.lower():
         search_retriever = retriever(
             query, 
             query_domains=query_domains,
-            researcher=researcher  # Pass researcher instance for MCP retrievers
+            researcher=researcher  # 为 MCP 检索器传入 researcher 实例
         )
     else:
         search_retriever = retriever(query, query_domains=query_domains)
@@ -45,20 +45,20 @@ async def generate_sub_queries(
     **kwargs
 ) -> List[str]:
     """
-    Generate sub-queries using the specified LLM model.
+    使用指定的 LLM 模型生成子查询。
 
-    Args:
-        query: The original query
-        parent_query: The parent query
-        report_type: The type of report
-        max_iterations: Maximum number of research iterations
-        context: Search results context
-        cfg: Configuration object
-        cost_callback: Callback for cost calculation
-        prompt_family: Family of prompts
+    参数:
+        query: 原始查询
+        parent_query: 父查询
+        report_type: 报告类型
+        max_iterations: 最大研究迭代次数
+        context: 搜索结果上下文
+        cfg: 配置对象
+        cost_callback: 成本计算回调
+        prompt_family: 提示词家族
 
-    Returns:
-        A list of sub-queries
+    返回:
+        子查询列表
     """
     gen_queries_prompt = prompt_family.generate_search_queries_prompt(
         query,
@@ -80,8 +80,8 @@ async def generate_sub_queries(
             **kwargs
         )
     except Exception as e:
-        logger.warning(f"Error with strategic LLM: {e}. Retrying with max_tokens={cfg.strategic_token_limit}.")
-        logger.warning(f"See https://github.com/assafelovic/gpt-researcher/issues/1022")
+        logger.warning(f"战略 LLM 出错: {e}。使用 max_tokens={cfg.strategic_token_limit} 重试。")
+        logger.warning("参见 https://github.com/assafelovic/gpt-researcher/issues/1022")
         try:
             response = await create_chat_completion(
                 model=cfg.strategic_llm_model,
@@ -92,10 +92,10 @@ async def generate_sub_queries(
                 cost_callback=cost_callback,
                 **kwargs
             )
-            logger.warning(f"Retrying with max_tokens={cfg.strategic_token_limit} successful.")
+            logger.warning(f"使用 max_tokens={cfg.strategic_token_limit} 重试成功。")
         except Exception as e:
-            logger.warning(f"Retrying with max_tokens={cfg.strategic_token_limit} failed.")
-            logger.warning(f"Error with strategic LLM: {e}. Falling back to smart LLM.")
+            logger.warning(f"使用 max_tokens={cfg.strategic_token_limit} 重试失败。")
+            logger.warning(f"战略 LLM 出错: {e}。回退到智能 LLM。")
             response = await create_chat_completion(
                 model=cfg.smart_llm_model,
                 messages=[{"role": "user", "content": gen_queries_prompt}],
@@ -121,41 +121,41 @@ async def plan_research_outline(
     **kwargs
 ) -> List[str]:
     """
-    Plan the research outline by generating sub-queries.
+    通过生成子查询来规划研究提纲。
 
-    Args:
-        query: Original query
-        search_results: Initial search results
-        agent_role_prompt: Agent role prompt
-        cfg: Configuration object
-        parent_query: Parent query
-        report_type: Report type
-        cost_callback: Callback for cost calculation
-        retriever_names: Names of the retrievers being used
+    参数:
+        query: 原始查询
+        search_results: 初始搜索结果
+        agent_role_prompt: 代理角色提示词
+        cfg: 配置对象
+        parent_query: 父查询
+        report_type: 报告类型
+        cost_callback: 成本计算回调
+        retriever_names: 使用中的检索器名称
 
-    Returns:
-        A list of sub-queries
+    返回:
+        子查询列表
     """
-    # Handle the case where retriever_names is not provided
+    # 处理未提供 retriever_names 的情况
     if retriever_names is None:
         retriever_names = []
     
-    # For MCP retrievers, we may want to skip sub-query generation
-    # Check if MCP is the only retriever or one of multiple retrievers
+    # 对于 MCP 检索器，可能需要跳过子查询生成
+    # 检查 MCP 是唯一检索器还是多检索器之一
     if retriever_names and ("mcp" in retriever_names or "MCPRetriever" in retriever_names):
         mcp_only = (len(retriever_names) == 1 and 
                    ("mcp" in retriever_names or "MCPRetriever" in retriever_names))
         
         if mcp_only:
-            # If MCP is the only retriever, skip sub-query generation
-            logger.info("Using MCP retriever only - skipping sub-query generation")
-            # Return the original query to prevent additional search iterations
+            # 如果 MCP 是唯一检索器，则跳过子查询生成
+            logger.info("仅使用 MCP 检索器 - 跳过子查询生成")
+            # 返回原始查询以避免额外搜索迭代
             return [query]
         else:
-            # If MCP is one of multiple retrievers, generate sub-queries for the others
-            logger.info("Using MCP with other retrievers - generating sub-queries for non-MCP retrievers")
+            # 如果 MCP 是多个检索器之一，则为其他检索器生成子查询
+            logger.info("与其他检索器一起使用 MCP - 为非 MCP 检索器生成子查询")
 
-    # Generate sub-queries for research outline
+    # 为研究提纲生成子查询
     sub_queries = await generate_sub_queries(
         query,
         parent_query,

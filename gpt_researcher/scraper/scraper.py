@@ -74,16 +74,16 @@ class Scraper:
         if not importlib.util.find_spec(pkg["import_name"]):
             pkg_inst_name = pkg["package_installation_name"]
             init(autoreset=True)
-            print(Fore.YELLOW + f"{pkg_inst_name} not found. Attempting to install...")
+            print(Fore.YELLOW + f"未找到 {pkg_inst_name}。正在尝试安装...")
             try:
                 subprocess.check_call(
                     [sys.executable, "-m", "pip", "install", pkg_inst_name]
                 )
-                print(Fore.GREEN + f"{pkg_inst_name} installed successfully.")
+                print(Fore.GREEN + f"{pkg_inst_name} 安装成功。")
             except subprocess.CalledProcessError:
                 raise ImportError(
                     Fore.RED
-                    + f"Unable to install {pkg_inst_name}. Please install manually with "
+                    + f"无法安装 {pkg_inst_name}。请手动安装："
                     f"`pip install -U {pkg_inst_name}`"
                 )
 
@@ -98,7 +98,7 @@ class Scraper:
 
                 # Get scraper name
                 scraper_name = scraper.__class__.__name__
-                self.logger.info(f"\n=== Using {scraper_name} ===")
+                self.logger.info(f"\n=== 使用 {scraper_name} ===")
 
                 # Get content
                 if hasattr(scraper, "scrape_async"):
@@ -113,7 +113,7 @@ class Scraper:
                     )
 
                 if len(content) < 100:
-                    self.logger.warning(f"Content too short or empty for {link}")
+                    self.logger.warning(f"{link} 的内容过短或为空")
                     return {
                         "url": link,
                         "raw_content": None,
@@ -122,16 +122,16 @@ class Scraper:
                     }
 
                 # Log results
-                self.logger.info(f"\nTitle: {title}")
+                self.logger.info(f"\n标题: {title}")
                 self.logger.info(
-                    f"Content length: {len(content) if content else 0} characters"
+                    f"内容长度: {len(content) if content else 0} 字符"
                 )
-                self.logger.info(f"Number of images: {len(image_urls)}")
-                self.logger.info(f"URL: {link}")
+                self.logger.info(f"图片数量: {len(image_urls)}")
+                self.logger.info(f"链接: {link}")
                 self.logger.info("=" * 50)
 
                 if not content or len(content) < 100:
-                    self.logger.warning(f"Content too short or empty for {link}")
+                    self.logger.warning(f"{link} 的内容过短或为空")
                     return {
                         "url": link,
                         "raw_content": None,
@@ -147,7 +147,7 @@ class Scraper:
                 }
 
             except Exception as e:
-                self.logger.error(f"Error processing {link}: {str(e)}")
+                self.logger.error(f"处理 {link} 时出错: {str(e)}")
                 return {"url": link, "raw_content": None, "image_urls": [], "title": ""}
 
     def get_scraper(self, link):
@@ -189,6 +189,6 @@ class Scraper:
 
         scraper_class = SCRAPER_CLASSES.get(scraper_key)
         if scraper_class is None:
-            raise Exception("Scraper not found.")
+            raise Exception("未找到对应的抓取器。")
 
         return scraper_class

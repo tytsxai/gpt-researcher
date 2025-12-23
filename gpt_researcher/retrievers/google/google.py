@@ -32,8 +32,8 @@ class GoogleSearch:
         try:
             api_key = os.environ["GOOGLE_API_KEY"]
         except:
-            raise Exception("Google API key not found. Please set the GOOGLE_API_KEY environment variable. "
-                            "You can get a key at https://developers.google.com/custom-search/v1/overview")
+            raise Exception("未找到 Google API 密钥。请设置 GOOGLE_API_KEY 环境变量。"
+                            "您可以在 https://developers.google.com/custom-search/v1/overview 获取密钥")
         return api_key
 
     def get_cx_key(self):
@@ -46,8 +46,8 @@ class GoogleSearch:
         try:
             api_key = os.environ["GOOGLE_CX_KEY"]
         except:
-            raise Exception("Google CX key not found. Please set the GOOGLE_CX_KEY environment variable. "
-                            "You can get a key at https://developers.google.com/custom-search/v1/overview")
+            raise Exception("未找到 Google CX 密钥。请设置 GOOGLE_CX_KEY 环境变量。"
+                            "您可以在 https://developers.google.com/custom-search/v1/overview 获取密钥")
         return api_key
 
     def search(self, max_results=7):
@@ -62,13 +62,13 @@ class GoogleSearch:
             domain_query = " OR ".join([f"site:{domain}" for domain in self.query_domains])
             search_query = f"({domain_query}) {self.query}"
 
-        print("Searching with query {0}...".format(search_query))
+        print("正在使用查询 {0} 进行搜索...".format(search_query))
 
         url = f"https://www.googleapis.com/customsearch/v1?key={self.api_key}&cx={self.cx_key}&q={search_query}&start=1"
         resp = requests.get(url)
 
         if resp.status_code < 200 or resp.status_code >= 300:
-            print("Google search: unexpected response status: ", resp.status_code)
+            print("Google 搜索：意外的响应状态：", resp.status_code)
 
         if resp is None:
             return

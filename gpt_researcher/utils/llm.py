@@ -14,6 +14,8 @@ from .costs import estimate_llm_cost
 from .validators import Subtopics
 import os
 
+from gpt_researcher.utils.openai_base_url import normalize_openai_base_url
+
 
 def get_llm(llm_provider, **kwargs):
     from gpt_researcher.llm_provider import GenericLLMProvider
@@ -75,7 +77,7 @@ async def create_chat_completion(
     if llm_provider == "openai":
         base_url = os.environ.get("OPENAI_BASE_URL", None)
         if base_url:
-            provider_kwargs['openai_api_base'] = base_url
+            provider_kwargs['openai_api_base'] = normalize_openai_base_url(base_url)
 
     provider = get_llm(llm_provider, **provider_kwargs)
     response = ""

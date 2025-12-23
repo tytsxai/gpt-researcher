@@ -56,9 +56,9 @@ async def write_md_to_pdf(text: str, filename: str = "") -> str:
                # md_file_path=f"{file_path}.md",
                css_file_path=css_path,
                base_url=None)
-        print(f"Report written to {file_path}")
+        print(f"报告已写入 {file_path}")
     except Exception as e:
-        print(f"Error in converting Markdown to PDF: {e}")
+        print(f"将 Markdown 转换为 PDF 时出错: {e}")
         return ""
 
     encoded_file_path = urllib.parse.quote(file_path)
@@ -88,11 +88,11 @@ async def write_md_to_word(text: str, filename: str = "") -> str:
         # Saving the docx document to file_path
         doc.save(file_path)
 
-        print(f"Report written to {file_path}")
+        print(f"报告已写入 {file_path}")
 
         encoded_file_path = urllib.parse.quote(file_path)
         return encoded_file_path
 
     except Exception as e:
-        print(f"Error in converting Markdown to DOCX: {e}")
+        print(f"将 Markdown 转换为 DOCX 时出错: {e}")
         return ""

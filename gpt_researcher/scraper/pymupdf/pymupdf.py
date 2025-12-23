@@ -63,8 +63,8 @@ class PyMuPDFScraper:
             return doc[0].page_content, image, doc[0].metadata["title"]
 
         except requests.exceptions.Timeout:
-            print(f"Download timed out. Please check the link : {self.link}")
+            print(f"下载超时。请检查链接: {self.link}")
             return "", [], ""
         except Exception as e:
-            print(f"Error loading PDF : {self.link} {e}")
+            print(f"加载 PDF 出错: {self.link} {e}")
             return "", [], ""

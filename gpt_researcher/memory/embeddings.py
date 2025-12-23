@@ -1,6 +1,8 @@
 import os
 from typing import Any
 
+from gpt_researcher.utils.openai_base_url import normalize_openai_base_url
+
 OPENAI_EMBEDDING_MODEL = os.environ.get(
     "OPENAI_EMBEDDING_MODEL", "text-embedding-3-small"
 )
@@ -37,8 +39,8 @@ class Memory:
                 _embeddings = OpenAIEmbeddings(
                     model=model,
                     openai_api_key=os.getenv("OPENAI_API_KEY", "custom"),
-                    openai_api_base=os.getenv(
-                        "OPENAI_BASE_URL", "http://localhost:1234/v1"
+                    openai_api_base=normalize_openai_base_url(
+                        os.getenv("OPENAI_BASE_URL", "http://localhost:1234/v1")
                     ),  # default for lmstudio
                     check_embedding_ctx_length=False,
                     **embedding_kwargs,
@@ -48,7 +50,7 @@ class Memory:
 
                 # Support custom OpenAI-compatible APIs via OPENAI_BASE_URL
                 if "openai_api_base" not in embedding_kwargs and os.environ.get("OPENAI_BASE_URL"):
-                    embedding_kwargs["openai_api_base"] = os.environ["OPENAI_BASE_URL"]
+                    embedding_kwargs["openai_api_base"] = normalize_openai_base_url(os.environ["OPENAI_BASE_URL"])
 
                 _embeddings = OpenAIEmbeddings(model=model, **embedding_kwargs)
             case "azure_openai":
@@ -137,7 +139,7 @@ class Memory:
                     **embedding_kwargs,
                 )
             case _:
-                raise Exception("Embedding not found.")
+                raise Exception("未找到 Embedding。")
 
         self._embeddings = _embeddings
 
