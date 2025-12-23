@@ -1,34 +1,34 @@
-# FAQ
+# 常见问题
 
-### How do I get started?
-It really depends on what you're aiming for. 
+### 如何开始使用？
+这取决于你的目标。
 
-If you're looking to connect your AI application to the internet with Tavily tailored API, check out the [Tavily API](https://docs.tavily.com/docs/tavily-api/introductionn) documentation. 
-If you're looking to build and deploy our open source autonomous research agent GPT Researcher, please see [GPT Researcher](/docs/gpt-researcher/getting-started/introduction) documentation.
-You can also check out demos and examples for inspiration [here](/docs/examples/examples).
+如果你想通过 Tavily 定制 API 将你的 AI 应用连接到互联网，请查看 [Tavily API](https://docs.tavily.com/docs/tavily-api/introductionn) 文档。
+如果你想构建和部署我们的开源自主研究代理 GPT Researcher，请参阅 [GPT Researcher](/docs/gpt-researcher/getting-started/introduction) 文档。
+你也可以在[这里](/docs/examples/examples)查看演示和示例以获取灵感。
 
-### What is GPT Researcher?
+### 什么是 GPT Researcher？
 
-GPT Researcher is a popular open source autonomous research agent that takes care of the tedious task of research for you, by scraping, filtering and aggregating over 20+ web sources per a single research task.
+GPT Researcher 是一个流行的开源自主研究代理，它通过抓取、过滤和聚合每个研究任务超过 20 个网络来源，为你处理繁琐的研究工作。
 
-GPT Researcher is built with best practices for leveraging LLMs (prompt engineering, RAG, chains, embeddings, etc), and is optimized for quick and efficient research. It is also fully customizable and can be tailored to your specific needs.
+GPT Researcher 采用了利用大语言模型的最佳实践（提示工程、RAG、链式调用、嵌入等），并针对快速高效的研究进行了优化。它也是完全可定制的，可以根据你的特定需求进行调整。
 
-To learn more about GPT Researcher, check out the [documentation page](/docs/gpt-researcher/getting-started/introduction).
+要了解更多关于 GPT Researcher 的信息，请查看[文档页面](/docs/gpt-researcher/getting-started/introduction)。
 
-### How much does each research run cost?
+### 每次研究运行的成本是多少？
 
-A research task using GPT Researcher costs around $0.01 per a single run (for GPT-4 usage). We're constantly optimizing LLM calls to reduce costs and improve performance. 
+使用 GPT Researcher 进行一次研究任务的成本约为 $0.01（使用 GPT-4）。我们不断优化大语言模型调用以降低成本并提高性能。
 
-### How do you ensure the report is factual and accurate?
+### 你们如何确保报告的真实性和准确性？
 
-we do our best to ensure that the information we provide is factual and accurate. We do this by using multiple sources, and by using proprietary AI to score and rank the most relevant and accurate information. We also use proprietary AI to filter out irrelevant information and sources.
+我们尽最大努力确保提供的信息真实准确。我们通过使用多个来源，并使用专有 AI 对最相关和准确的信息进行评分和排名来实现这一点。我们还使用专有 AI 过滤掉不相关的信息和来源。
 
-Lastly, by using RAG and other techniques, we ensure that the information is relevant to the context of the research task, leading to more accurate generative AI content and reduced hallucinations.
+最后，通过使用 RAG 和其他技术，我们确保信息与研究任务的上下文相关，从而生成更准确的 AI 内容并减少幻觉。
 
-### What are your plans for the future?
+### 你们未来的计划是什么？
 
-We're constantly working on improving our products and services. We're currently working on improving our search API together with design partners, and adding more data sources to our search engine. We're also working on improving our research agent GPT Researcher, and adding more features to it while growing our amazing open source community.
+我们不断致力于改进我们的产品和服务。我们目前正在与设计合作伙伴一起改进我们的搜索 API，并为我们的搜索引擎添加更多数据源。我们还在改进我们的研究代理 GPT Researcher，为其添加更多功能，同时发展我们出色的开源社区。
 
-If you're interested in our roadmap or looking to collaborate, check out our [roadmap page](https://trello.com/b/3O7KBePw/gpt-researcher-roadmap). 
+如果你对我们的路线图感兴趣或希望合作，请查看我们的[路线图页面](https://trello.com/b/3O7KBePw/gpt-researcher-roadmap)。
 
-Feel free to [contact us](mailto:assafelovic@gmail.com) if you have any further questions or suggestions!
+如果你有任何进一步的问题或建议，请随时[联系我们](mailto:assafelovic@gmail.com)！
