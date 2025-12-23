@@ -37,7 +37,7 @@ export const useResearchHistoryContext = () => {
   const context = useContext(ResearchHistoryContext);
   
   if (context === undefined) {
-    throw new Error('useResearchHistoryContext must be used within a ResearchHistoryProvider');
+    throw new Error('useResearchHistoryContext 必须在 ResearchHistoryProvider 内使用');
   }
   
   return context;

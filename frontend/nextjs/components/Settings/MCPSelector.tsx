@@ -30,7 +30,7 @@ const MCPSelector: React.FC<MCPSelectorProps> = ({
     isValid: boolean;
     message: string;
     serverCount?: number;
-  }>({ isValid: true, message: 'Valid JSON ✓' });
+  }>({ isValid: true, message: '有效的 JSON ✓' });
   const [showInfoModal, setShowInfoModal] = useState(false);
 
   useEffect(() => {
@@ -51,7 +51,7 @@ const MCPSelector: React.FC<MCPSelectorProps> = ({
 
   const validateConfig = (text: string) => {
     if (!text.trim() || text.trim() === '[]') {
-      setValidationStatus({ isValid: true, message: 'Empty configuration' });
+      setValidationStatus({ isValid: true, message: '空配置' });
       return true;
     }
 
@@ -59,16 +59,16 @@ const MCPSelector: React.FC<MCPSelectorProps> = ({
       const parsed = JSON.parse(text);
 
       if (!Array.isArray(parsed)) {
-        throw new Error('Configuration must be an array');
+        throw new Error('配置必须是数组');
       }
 
       const errors: string[] = [];
       parsed.forEach((server: any, index: number) => {
         if (!server.name) {
-          errors.push(`Server ${index + 1}: missing name`);
+          errors.push(`服务器 ${index + 1}: 缺少名称`);
         }
         if (!server.command && !server.connection_url) {
-          errors.push(`Server ${index + 1}: missing command or connection_url`);
+          errors.push(`服务器 ${index + 1}: 缺少命令或连接地址`);
         }
       });
 
@@ -78,14 +78,14 @@ const MCPSelector: React.FC<MCPSelectorProps> = ({
 
       setValidationStatus({
         isValid: true,
-        message: `Valid JSON ✓ (${parsed.length} server${parsed.length !== 1 ? 's' : ''})`,
+        message: `有效的 JSON ✓ (${parsed.length} 个服务器${parsed.length !== 1 ? '' : ''})`,
         serverCount: parsed.length
       });
       return true;
     } catch (error: any) {
       setValidationStatus({
         isValid: false,
-        message: `Invalid JSON: ${error.message}`
+        message: `无效的 JSON: ${error.message}`
       });
       return false;
     }
@@ -165,7 +165,7 @@ const MCPSelector: React.FC<MCPSelectorProps> = ({
         command: 'npx',
         args: ['-y', '@modelcontextprotocol/server-github'],
         env: {
-          GITHUB_PERSONAL_ACCESS_TOKEN: 'your_github_token_here'
+          GITHUB_PERSONAL_ACCESS_TOKEN: '在此处输入您的_github_token'
         }
       },
       tavily: {
@@ -173,13 +173,13 @@ const MCPSelector: React.FC<MCPSelectorProps> = ({
         command: 'npx',
         args: ['-y', 'tavily-mcp@0.1.2'],
         env: {
-          TAVILY_API_KEY: 'your_tavily_api_key_here'
+          TAVILY_API_KEY: '在此处输入您的_tavily_api_key'
         }
       },
       filesystem: {
         name: 'filesystem',
         command: 'npx',
-        args: ['-y', '@modelcontextprotocol/server-filesystem', '/path/to/allowed/directory'],
+        args: ['-y', '@modelcontextprotocol/server-filesystem', '/允许访问的目录路径'],
         env: {}
       }
     };
@@ -236,13 +236,13 @@ const MCPSelector: React.FC<MCPSelectorProps> = ({
         command: 'npx',
         args: ['-y', '@modelcontextprotocol/server-github'],
         env: {
-          GITHUB_PERSONAL_ACCESS_TOKEN: 'your_github_token_here'
+          GITHUB_PERSONAL_ACCESS_TOKEN: '在此处输入您的_github_token'
         }
       },
       {
         name: 'filesystem',
         command: 'npx',
-        args: ['-y', '@modelcontextprotocol/server-filesystem', '/path/to/allowed/directory'],
+        args: ['-y', '@modelcontextprotocol/server-filesystem', '/允许访问的目录路径'],
         env: {}
       }
     ];
@@ -261,25 +261,25 @@ const MCPSelector: React.FC<MCPSelectorProps> = ({
               checked={enabled}
               onChange={handleEnabledChange}
             />
-            Enable MCP (Model Context Protocol)
+            启用 MCP（模型上下文协议）
           </label>
           <button
             type="button"
             className="settings mcp-info-btn"
             onClick={() => setShowInfoModal(true)}
-            title="Learn about MCP"
+            title="了解 MCP"
           >
             ℹ️
           </button>
         </div>
         <small className="text-muted" style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.85rem', marginBottom: '15px', display: 'block' }}>
-          Connect to external tools and data sources through MCP servers
+          通过 MCP 服务器连接外部工具和数据源
         </small>
 
         {enabled && (
           <div className="settings mcp-config-section">
             <div className="settings mcp-presets">
-              <label className="agent_question" style={{ marginBottom: '10px' }}>Quick Presets</label>
+              <label className="agent_question" style={{ marginBottom: '10px' }}>快速预设</label>
               <div className="settings preset-buttons">
                 <button
                   type="button"
@@ -293,27 +293,27 @@ const MCPSelector: React.FC<MCPSelectorProps> = ({
                   className={`settings preset-btn ${isPresetSelected('tavily') ? 'selected' : ''}`}
                   onClick={() => togglePreset('tavily')}
                 >
-                  <i className="fas fa-search"></i> Tavily Web Search
+                  <i className="fas fa-search"></i> Tavily 网络搜索
                 </button>
                 <button
                   type="button"
                   className={`settings preset-btn ${isPresetSelected('filesystem') ? 'selected' : ''}`}
                   onClick={() => togglePreset('filesystem')}
                 >
-                  <i className="fas fa-folder"></i> Local Files
+                  <i className="fas fa-folder"></i> 本地文件
                 </button>
               </div>
               <small className="text-muted" style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.85rem', marginTop: '8px', display: 'block' }}>
-                Click a preset to toggle MCP servers in the configuration below. Selected presets are highlighted.
+                点击预设以在下方配置中切换 MCP 服务器。选中的预设已高亮显示。
               </small>
             </div>
 
             <div className="settings mcp-config-group">
-              <label className="agent_question" style={{ marginBottom: '10px' }}>MCP Servers Configuration</label>
+              <label className="agent_question" style={{ marginBottom: '10px' }}>MCP 服务器配置</label>
               <textarea
                 className={`settings mcp-config-textarea ${validationStatus.isValid ? 'valid' : 'invalid'}`}
                 rows={12}
-                placeholder="Paste your MCP servers configuration as JSON array..."
+                placeholder="粘贴您的 MCP 服务器配置（JSON 数组）..."
                 value={configText}
                 onChange={handleConfigChange}
                 style={{ minHeight: '300px' }}
@@ -327,22 +327,22 @@ const MCPSelector: React.FC<MCPSelectorProps> = ({
                   className="settings mcp-format-btn"
                   onClick={formatJSON}
                 >
-                  <i className="fas fa-code"></i> Format JSON
+                  <i className="fas fa-code"></i> 格式化 JSON
                 </button>
               </div>
               <small className="text-muted" style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.85rem', marginTop: '8px', display: 'block', lineHeight: '1.4' }}>
-                Paste your MCP servers configuration as a JSON array. Each server should have properties like{' '}
+                将您的 MCP 服务器配置粘贴为 JSON 数组。每个服务器应包含以下属性，如{' '}
                 <code style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', padding: '2px 4px', borderRadius: '3px', color: '#0d9488' }}>name</code>,{' '}
                 <code style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', padding: '2px 4px', borderRadius: '3px', color: '#0d9488' }}>command</code>,{' '}
-                <code style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', padding: '2px 4px', borderRadius: '3px', color: '#0d9488' }}>args</code>, and optional{' '}
-                <code style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', padding: '2px 4px', borderRadius: '3px', color: '#0d9488' }}>env</code> variables.{' '}
+                <code style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', padding: '2px 4px', borderRadius: '3px', color: '#0d9488' }}>args</code>, 以及可选的{' '}
+                <code style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', padding: '2px 4px', borderRadius: '3px', color: '#0d9488' }}>env</code> 变量。{' '}
                 <a
                   href="#"
                   className="settings mcp-example-link"
                   onClick={(e) => { e.preventDefault(); showExample(); }}
                   style={{ color: '#0d9488', textDecoration: 'none', fontWeight: '500' }}
                 >
-                  See example →
+                  查看示例 →
                 </a>
               </small>
             </div>
@@ -359,32 +359,32 @@ const MCPSelector: React.FC<MCPSelectorProps> = ({
               >
                 <i className="fas fa-times"></i>
               </button>
-              <h3>Model Context Protocol (MCP)</h3>
-              <p>MCP enables GPT Researcher to connect with external tools and data sources through a standardized protocol.</p>
-
-              <h4 className="highlight">Benefits:</h4>
+              <h3>模型上下文协议 (MCP)</h3>
+              <p>MCP 使 GPT Researcher 能够通过标准化协议连接外部工具和数据源。</p>
+              
+              <h4 className="highlight">优势：</h4>
               <ul>
-                <li><span className="highlight">Access Local Data:</span> Connect to databases, file systems, and APIs</li>
-                <li><span className="highlight">Use External Tools:</span> Integrate with web services and third-party tools</li>
-                <li><span className="highlight">Extend Capabilities:</span> Add custom functionality through MCP servers</li>
-                <li><span className="highlight">Maintain Security:</span> Controlled access with proper authentication</li>
+                <li><span className="highlight">访问本地数据：</span> 连接数据库、文件系统和 API</li>
+                <li><span className="highlight">使用外部工具：</span> 与网络服务和第三方工具集成</li>
+                <li><span className="highlight">扩展能力：</span> 通过 MCP 服务器添加自定义功能</li>
+                <li><span className="highlight">维护安全性：</span> 通过适当的身份验证进行受控访问</li>
               </ul>
-
-              <h4 className="highlight">Quick Start:</h4>
+              
+              <h4 className="highlight">快速开始：</h4>
               <ul>
-                <li>Enable MCP using the checkbox above</li>
-                <li>Click a preset to add pre-configured servers to the JSON</li>
-                <li>Or paste your own MCP configuration as a JSON array</li>
-                <li>Start your research - MCP will run with optimal settings</li>
+                <li>使用上方的复选框启用 MCP</li>
+                <li>点击预设以将预配置的服务器添加到 JSON</li>
+                <li>或将您自己的 MCP 配置粘贴为 JSON 数组</li>
+                <li>开始研究 - MCP 将以最佳设置运行</li>
               </ul>
-
-              <h4 className="highlight">Configuration Format:</h4>
-              <p>Each MCP server should be a JSON object with these properties:</p>
+              
+              <h4 className="highlight">配置格式：</h4>
+              <p>每个 MCP 服务器应为包含以下属性的 JSON 对象：</p>
               <ul>
-                <li><span className="highlight">name:</span> Unique identifier (e.g., &quot;github&quot;, &quot;filesystem&quot;)</li>
-                <li><span className="highlight">command:</span> Command to run the server (e.g., &quot;npx&quot;, &quot;python&quot;)</li>
-                <li><span className="highlight">args:</span> Array of arguments (e.g., [&quot;-y&quot;, &quot;@modelcontextprotocol/server-github&quot;])</li>
-                <li><span className="highlight">env:</span> Object with environment variables (e.g., {JSON.stringify({API_KEY: "your_key"})})</li>
+                <li><span className="highlight">name:</span> 唯一标识符（例如："github"、"filesystem"）</li>
+                <li><span className="highlight">command:</span> 运行服务器的命令（例如："npx"、"python"）</li>
+                <li><span className="highlight">args:</span> 参数数组（例如：["-y", "@modelcontextprotocol/server-github"]）</li>
+                <li><span className="highlight">env:</span> 包含环境变量的对象（例如：{JSON.stringify({API_KEY: "您的密钥"})}）</li>
               </ul>
             </div>
           </div>

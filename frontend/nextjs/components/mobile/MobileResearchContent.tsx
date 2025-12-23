@@ -219,14 +219,14 @@ export default function MobileResearchContent({
               <>
                 <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse mr-2"></div>
                 <span className="text-xs text-gray-300">
-                  {localLoading ? "Researching..." : "Processing..."}
+                  {localLoading ? "研究中..." : "处理中..."}
                 </span>
               </>
             )}
             {!localLoading && !localProcessing && currentResearchId && (
               <>
                 <div className="w-2 h-2 rounded-full bg-teal-500 mr-2"></div>
-                <span className="text-xs text-gray-300">Research complete</span>
+                <span className="text-xs text-gray-300">研究完成</span>
               </>
             )}
           </div>
@@ -242,7 +242,7 @@ export default function MobileResearchContent({
                 <polyline points="16 6 12 2 8 6"></polyline>
                 <line x1="12" y1="2" x2="12" y2="15"></line>
               </svg>
-              Share
+              分享
             </button>
           )}
         </div>

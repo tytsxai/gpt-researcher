@@ -37,23 +37,23 @@ export default function MobileLayout({
   const [showSettings, setShowSettings] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   
-  // Get research history from context
+  // 从上下文获取研究历史
   const { history } = useResearchHistoryContext();
-  
-  // Format timestamp for display
+
+  // 格式化时间戳用于显示
   const formatTimestamp = (timestamp: number | string | Date | undefined) => {
-    if (!timestamp) return 'Unknown time';
+    if (!timestamp) return '未知时间';
     
     try {
       const date = new Date(timestamp);
-      if (isNaN(date.getTime())) return 'Unknown time';
+      if (isNaN(date.getTime())) return '未知时间';
       return formatDistanceToNow(date, { addSuffix: true });
     } catch {
-      return 'Unknown time';
+      return '未知时间';
     }
   };
-  
-  // Handle history item selection
+
+  // 处理历史记录项选择
   const handleHistoryItemClick = (id: string) => {
     setShowHistory(false);
     window.location.href = `/research/${id}`;
@@ -66,10 +66,10 @@ export default function MobileLayout({
         toastOptions={toastOptions}
       />
       
-      {/* Mobile Header - simplified and compact */}
+      {/* 移动端头部 - 简化紧凑 */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-gray-900/95 backdrop-blur-md border-b border-gray-800/50 shadow-md">
         <div className="flex items-center justify-between px-4 h-14">
-          {/* Logo */}
+          {/* 标志 */}
           <div className="flex items-center">
             <a href="/" className="flex items-center">
               <img
@@ -82,14 +82,14 @@ export default function MobileLayout({
               <span className="font-medium text-gray-200 text-sm">GPT Researcher</span>
             </a>
           </div>
-          
-          {/* Actions */}
+
+          {/* 操作按钮 */}
           <div className="flex items-center space-x-2">
             {loading && (
               <button
                 onClick={onStop}
                 className="p-2 rounded-full bg-red-500/20 text-red-300 hover:bg-red-500/30"
-                aria-label="Stop research"
+                aria-label="停止研究"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="6" y="6" width="12" height="12" rx="2" ry="2"></rect>
@@ -101,7 +101,7 @@ export default function MobileLayout({
               <button
                 onClick={onNewResearch}
                 className="p-2 rounded-full bg-sky-500/20 text-sky-300 hover:bg-sky-500/30"
-                aria-label="New research"
+                aria-label="新研究"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -117,7 +117,7 @@ export default function MobileLayout({
                 if (toggleSidebar) toggleSidebar();
               }}
               className="p-2 rounded-full bg-gray-800/50 text-gray-300 hover:bg-gray-700/50"
-              aria-label="View history"
+              aria-label="查看历史"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -134,7 +134,7 @@ export default function MobileLayout({
                 setShowHistory(false);
               }}
               className="p-2 rounded-full bg-gray-800/50 text-gray-300 hover:bg-gray-700/50"
-              aria-label="Settings"
+              aria-label="设置"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="3"></circle>
@@ -144,11 +144,11 @@ export default function MobileLayout({
           </div>
         </div>
         
-        {/* History panel - slides down when active */}
+        {/* 历史记录面板 - 激活时向下滑动 */}
         {showHistory && (
           <div className="px-4 py-3 bg-gray-800/90 border-t border-gray-700/50 animate-slide-down shadow-lg max-h-[70vh] overflow-y-auto custom-scrollbar">
             <div className="mb-3 flex justify-between items-center">
-              <h3 className="text-sm font-medium text-gray-200">Research History</h3>
+              <h3 className="text-sm font-medium text-gray-200">研究历史</h3>
               <button 
                 onClick={() => setShowHistory(false)}
                 className="text-gray-400 hover:text-gray-300"
@@ -186,34 +186,34 @@ export default function MobileLayout({
                     <polyline points="12 6 12 12 16 14"></polyline>
                   </svg>
                 </div>
-                <p className="text-sm text-gray-400">No research history yet</p>
-                <button 
-                  onClick={onNewResearch} 
+                <p className="text-sm text-gray-400">暂无研究历史</p>
+                <button
+                  onClick={onNewResearch}
                   className="mt-3 px-4 py-2 text-xs text-teal-300 bg-teal-900/30 hover:bg-teal-800/40 rounded-md transition-colors"
                 >
-                  Start New Research
+                  开始新研究
                 </button>
               </div>
             )}
             
             {history.length > 0 && (
               <div className="mt-3 pt-2 border-t border-gray-700/30 flex justify-center">
-                <a 
-                  href="/history" 
+                <a
+                  href="/history"
                   className="text-xs text-teal-400 hover:text-teal-300 transition-colors"
                 >
-                  View All Research History
+                  查看所有研究历史
                 </a>
               </div>
             )}
           </div>
         )}
         
-        {/* Settings panel - slides down when active */}
+        {/* 设置面板 - 激活时向下滑动 */}
         {showSettings && (
           <div className="px-4 py-3 bg-gray-800/90 border-t border-gray-700/50 animate-slide-down shadow-lg">
             <div className="mb-2 flex justify-between items-center">
-              <h3 className="text-sm font-medium text-gray-200">Settings</h3>
+              <h3 className="text-sm font-medium text-gray-200">设置</h3>
               <button 
                 onClick={() => setShowSettings(false)}
                 className="text-gray-400 hover:text-gray-300"
@@ -227,57 +227,57 @@ export default function MobileLayout({
             
             <div className="space-y-3">
               <div>
-                <label className="block text-xs text-gray-400 mb-1">Report Type</label>
-                <select 
+                <label className="block text-xs text-gray-400 mb-1">报告类型</label>
+                <select
                   className="w-full bg-gray-900 border border-gray-700 rounded-md py-1.5 px-2 text-sm text-gray-300 focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500"
                   value={chatBoxSettings.report_type}
                   onChange={(e) => setChatBoxSettings({...chatBoxSettings, report_type: e.target.value})}
                 >
-                  <option value="research_report">Summary - Short and fast (~2 min)</option>
-                  <option value="deep">Deep Research Report</option>
-                  <option value="multi_agents">Multi Agents Report</option>
-                  <option value="detailed_report">Detailed - In depth and longer (~5 min)</option>
+                  <option value="research_report">摘要 - 简短快速 (~2 分钟)</option>
+                  <option value="deep">深度研究报告</option>
+                  <option value="multi_agents">多代理报告</option>
+                  <option value="detailed_report">详细 - 深入且较长 (~5 分钟)</option>
                 </select>
               </div>
               
               <div>
-                <label className="block text-xs text-gray-400 mb-1">Research Source</label>
-                <select 
+                <label className="block text-xs text-gray-400 mb-1">研究来源</label>
+                <select
                   className="w-full bg-gray-900 border border-gray-700 rounded-md py-1.5 px-2 text-sm text-gray-300 focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500"
                   value={chatBoxSettings.report_source}
                   onChange={(e) => setChatBoxSettings({...chatBoxSettings, report_source: e.target.value})}
                 >
-                  <option value="web">Web</option>
-                  <option value="scholar">Scholar</option>
+                  <option value="web">网络</option>
+                  <option value="scholar">学术</option>
                 </select>
               </div>
               
               <div>
-                <label className="block text-xs text-gray-400 mb-1">Research Tone</label>
-                <select 
+                <label className="block text-xs text-gray-400 mb-1">研究语气</label>
+                <select
                   className="w-full bg-gray-900 border border-gray-700 rounded-md py-1.5 px-2 text-sm text-gray-300 focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500"
                   value={chatBoxSettings.tone}
                   onChange={(e) => setChatBoxSettings({...chatBoxSettings, tone: e.target.value})}
                 >
-                  <option value="Objective">Objective - Impartial and unbiased presentation of facts</option>
-                  <option value="Formal">Formal - Adheres to academic standards</option>
-                  <option value="Analytical">Analytical - Critical evaluation of data</option>
-                  <option value="Persuasive">Persuasive - Convincing viewpoint</option>
-                  <option value="Informative">Informative - Clear, comprehensive information</option>
-                  <option value="Simple">Simple - Basic vocabulary and clear explanations</option>
-                  <option value="Casual">Casual - Conversational style</option>
+                  <option value="Objective">客观 - 公正无偏见地呈现事实</option>
+                  <option value="Formal">正式 - 符合学术标准</option>
+                  <option value="Analytical">分析性 - 对数据进行批判性评估</option>
+                  <option value="Persuasive">说服性 - 令人信服的观点</option>
+                  <option value="Informative">信息性 - 清晰全面的信息</option>
+                  <option value="Simple">简单 - 基础词汇和清晰解释</option>
+                  <option value="Casual">随意 - 对话式风格</option>
                 </select>
               </div>
               
               <div>
-                <label className="block text-xs text-gray-400 mb-1">Layout</label>
-                <select 
+                <label className="block text-xs text-gray-400 mb-1">布局</label>
+                <select
                   className="w-full bg-gray-900 border border-gray-700 rounded-md py-1.5 px-2 text-sm text-gray-300 focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500"
                   value={chatBoxSettings.layoutType}
                   onChange={(e) => setChatBoxSettings({...chatBoxSettings, layoutType: e.target.value})}
                 >
-                  <option value="copilot">Copilot - Chat style layout</option>
-                  <option value="document">Document - Traditional report layout</option>
+                  <option value="copilot">助手 - 聊天式布局</option>
+                  <option value="document">文档 - 传统报告布局</option>
                 </select>
               </div>
             </div>
@@ -285,15 +285,15 @@ export default function MobileLayout({
         )}
       </header>
       
-      {/* Main content area */}
-      <div 
+      {/* 主内容区域 */}
+      <div
         ref={contentRef}
-        className="flex-1 pt-14" /* Matches header height */
+        className="flex-1 pt-14" /* 匹配头部高度 */
       >
         {children}
       </div>
-      
-      {/* Footer */}
+
+      {/* 页脚 */}
       <footer className="mt-auto py-3 px-4 text-center border-t border-gray-800/40 bg-gray-900/80 backdrop-blur-sm">
         <div className="flex items-center justify-center gap-5 mb-3">
           <a href="https://gptr.dev" target="_blank" className="text-gray-400 hover:text-teal-400 transition-colors">
@@ -344,7 +344,7 @@ export default function MobileLayout({
         </div>
       </footer>
       
-      {/* Custom animations */}
+      {/* 自定义动画 */}
       <style jsx global>{`
         .animate-slide-down {
           animation: slideDown 0.3s ease-out forwards;
@@ -361,7 +361,7 @@ export default function MobileLayout({
           }
         }
         
-        /* Custom scrollbar for history panel */
+        /* 历史记录面板的自定义滚动条 */
         .custom-scrollbar::-webkit-scrollbar {
           width: 4px;
         }
@@ -387,7 +387,7 @@ export default function MobileLayout({
         }
         
         @media (display-mode: standalone) {
-          /* PWA specific styles */
+          /* PWA 特定样式 */
           body {
             overscroll-behavior-y: contain;
             -webkit-tap-highlight-color: transparent;

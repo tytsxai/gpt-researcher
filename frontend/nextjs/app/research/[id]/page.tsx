@@ -163,7 +163,7 @@ export default function ResearchPage({ params }: { params: { id: string } }) {
           // Only show error toast if we haven't shown a toast yet in this component instance
           if (!toastShownRef.current) {
             console.log('Showing backend error toast');
-            toast.error("Server connection error. Using local data if available.", {
+            toast.error("服务器连接错误。如有可用本地数据，将使用本地数据。", {
               id: `server-error-${id}`, // Unique ID per research
             });
             toastShownRef.current = true;
@@ -191,7 +191,7 @@ export default function ResearchPage({ params }: { params: { id: string } }) {
         // Only show error toast if we haven't shown a toast yet in this component instance
         if (!toastShownRef.current) {
           console.log('Showing fetch error toast');
-          toast.error("Failed to connect to server. Using local data if available.", {
+          toast.error("无法连接到服务器。如有可用本地数据，将使用本地数据。", {
             id: `fetch-error-${id}`, // Unique ID per research
           });
           toastShownRef.current = true;
@@ -397,7 +397,7 @@ export default function ResearchPage({ params }: { params: { id: string } }) {
         // Show error message
         const errorChatData: ChatData = { 
           type: 'chat', 
-          content: 'Sorry, something went wrong. Please try again.' 
+          content: '抱歉，出了点问题。请重试。' 
         };
         setOrderedData(prevOrder => [...prevOrder, errorChatData]);
       }
@@ -407,7 +407,7 @@ export default function ResearchPage({ params }: { params: { id: string } }) {
       // Add error message
       const errorChatData: ChatData = { 
         type: 'chat', 
-        content: 'Sorry, there was an error processing your request. Please try again.' 
+        content: '抱歉，处理您的请求时出错。请重试。' 
       };
       setOrderedData(prevOrder => [...prevOrder, errorChatData]);
     } finally {
@@ -423,12 +423,12 @@ export default function ResearchPage({ params }: { params: { id: string } }) {
     const url = window.location.href;
     navigator.clipboard.writeText(url)
       .then(() => {
-        toast.success("URL copied to clipboard!", {
+        toast.success("URL 已复制到剪贴板！", {
           id: `copy-success-${id}`, // Unique ID per research
         });
       })
       .catch(() => {
-        toast.error("Failed to copy URL", {
+        toast.error("复制 URL 失败", {
           id: `copy-error-${id}`, // Unique ID per research
         });
       });

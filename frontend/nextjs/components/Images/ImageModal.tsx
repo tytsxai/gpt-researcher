@@ -13,7 +13,7 @@ interface ImageModalProps {
 export default function ImageModal({ imageSrc, isOpen, onClose, onNext, onPrev }: ImageModalProps) {
     useEffect(() => {
         if (!isOpen) return;
-        
+
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'ArrowLeft') {
                 onPrev?.();
@@ -30,7 +30,7 @@ export default function ImageModal({ imageSrc, isOpen, onClose, onNext, onPrev }
 
     if (!isOpen) return null;
 
-    // Swipe detection for mobile
+    // 移动端滑动检测
     let touchStartX = 0;
     let touchEndX = 0;
 
@@ -73,7 +73,7 @@ export default function ImageModal({ imageSrc, isOpen, onClose, onNext, onPrev }
                 </button>
                 <img
                     src={imageSrc}
-                    alt="Modal view"
+                    alt="模态框视图"
                     className="max-h-[90vh] max-w-[90vw] object-contain"
                 />
                 <button

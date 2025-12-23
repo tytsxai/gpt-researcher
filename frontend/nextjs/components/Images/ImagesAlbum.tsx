@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ImageModal from './ImageModal';
 
-type ImageType = any; // Simple type definition to avoid errors
+type ImageType = any; // 简单类型定义以避免错误
 
 interface ImagesAlbumProps {
   images: ImageType[];
@@ -24,7 +24,7 @@ export default function ImagesAlbum({ images }: ImagesAlbumProps) {
         setSelectedImage(null);
     };
 
-    // Handle navigation in modal
+    // 处理模态框中的导航
     const nextImage = () => {
         setSelectedIndex((prevIndex) => (prevIndex + 1) % validImages.length);
         setSelectedImage(validImages[(selectedIndex + 1) % validImages.length]);
@@ -35,7 +35,7 @@ export default function ImagesAlbum({ images }: ImagesAlbumProps) {
         setSelectedImage(validImages[(selectedIndex - 1 + validImages.length) % validImages.length]);
     };
 
-    // Handle broken images by filtering them out
+    // 通过过滤处理损坏的图片
     const handleImageError = (brokenImage: ImageType) => {
         setValidImages((prevImages) => prevImages.filter((img) => img !== brokenImage));
     };
@@ -58,7 +58,7 @@ export default function ImagesAlbum({ images }: ImagesAlbumProps) {
                     >
                         <img
                             src={image}
-                            alt={`Image ${index + 1}`}
+                            alt={`图片 ${index + 1}`}
                             className="absolute inset-0 w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity duration-300"
                             onClick={() => openModal(image, index)}
                             onError={() => handleImageError(image)}

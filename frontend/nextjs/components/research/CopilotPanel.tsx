@@ -98,7 +98,7 @@ const CopilotPanel: React.FC<CopilotPanelProps> = ({
           {/* Connection status indicator */}
           <div className="flex items-center">
             <div className={`w-1.5 h-1.5 rounded-full ${loading || isProcessingChat ? 'bg-amber-500 animate-pulse' : 'bg-teal-500'} mr-2`}></div>
-            <span className="text-xs text-gray-400">{loading ? 'researching' : isProcessingChat ? 'thinking' : 'active'}</span>
+            <span className="text-xs text-gray-400">{loading ? '研究中' : isProcessingChat ? '思考中' : '活跃'}</span>
           </div>
           
           {/* Toggle button */}
@@ -109,7 +109,7 @@ const CopilotPanel: React.FC<CopilotPanelProps> = ({
                 setIsCopilotVisible(false);
               }}
               className="flex items-center justify-center w-7 h-7 rounded-md hover:bg-gray-800 text-gray-400 hover:text-gray-200 transition-colors border border-transparent hover:border-gray-700/50"
-              aria-label="Hide copilot panel"
+              aria-label="隐藏副驾驶面板"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M9 18l6-6-6-6" />
@@ -135,9 +135,9 @@ const CopilotPanel: React.FC<CopilotPanelProps> = ({
               </div>
               <div className="text-gray-300 text-sm">
                 {loading ? (
-                  <p>Working on your research... I&apos;ll analyze the results once they&apos;re complete.</p>
+                  <p>正在研究您的问题...我会在结果完成后进行分析。</p>
                 ) : (
-                  <p>I&apos;ve analyzed all the research results and can answer any questions about it. How can I help?</p>
+                  <p>我已分析所有研究结果，可以回答关于它的任何问题。我能帮您做什么？</p>
                 )}
               </div>
             </div>
@@ -189,7 +189,7 @@ const CopilotPanel: React.FC<CopilotPanelProps> = ({
         )}
         {isStopped && (
           <div className="text-center p-2 text-gray-400 bg-gray-800/40 rounded-md border border-gray-700/40 text-sm">
-            Research has been stopped. Start a new research to continue chatting.
+            研究已停止。开始新研究以继续聊天。
           </div>
         )}
       </div>

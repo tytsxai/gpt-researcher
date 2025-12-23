@@ -37,11 +37,12 @@ const LogMessage: React.FC<LogMessageProps> = ({ logs }) => {
               const processedData = await Promise.all(
                 Object.keys(data).map(async (field) => {
                   const fieldValue = data[field].after || data[field].before;
+                  const displayField = fieldMapping[field] || field;
                   if (!plainTextFields.includes(field)) {
                     const htmlContent = await markdownToHtml(fieldValue);
-                    return { field, htmlContent, isMarkdown: true };
+                    return { field: displayField, htmlContent, isMarkdown: true };
                   }
-                  return { field, htmlContent: fieldValue, isMarkdown: false };
+                  return { field: displayField, htmlContent: fieldValue, isMarkdown: false };
                 })
               );
               return { ...log, processedData };
@@ -83,5 +84,20 @@ const LogMessage: React.FC<LogMessageProps> = ({ logs }) => {
 };
 
 const plainTextFields = ['task', 'sections', 'headers', 'sources', 'research_data'];
+
+const fieldMapping: { [key: string]: string } = {
+  'task': '任务',
+  'sections': '章节',
+  'headers': '标题',
+  'sources': '来源',
+  'research_data': '研究数据',
+  'query': '查询',
+  'report': '报告',
+  'subqueries': '子查询',
+  'urls': 'URL',
+  'context': '上下文',
+  'costs': '费用',
+  'images': '图片'
+};
 
 export default LogMessage;

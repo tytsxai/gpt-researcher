@@ -42,7 +42,7 @@ export default function CopilotLayout({
         toastOptions={toastOptions}
       />
       
-      {/* Show Header only when not in research mode */}
+      {/* 仅在非研究模式下显示头部 */}
       {!showResult && (
         <Header 
           loading={loading}

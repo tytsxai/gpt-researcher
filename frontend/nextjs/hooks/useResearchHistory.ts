@@ -204,7 +204,7 @@ export const useResearchHistory = () => {
       }
     } catch (error) {
       console.error('Error saving research:', error);
-      toast.error('Failed to save research to server. Saved locally only.');
+      toast.error('无法保存研究到服务器。仅保存在本地。');
       
       // Fallback: save to localStorage only
       const newResearch = {

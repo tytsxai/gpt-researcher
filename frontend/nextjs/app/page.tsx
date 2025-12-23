@@ -176,7 +176,7 @@ export default function Home() {
         });
         
         if (!response.ok) {
-          throw new Error(`API error: ${response.status}`);
+          throw new Error(`API 错误: ${response.status}`);
         }
         
         const data = await response.json();
@@ -220,7 +220,7 @@ export default function Home() {
           // Show error message
           setOrderedData(prevOrder => [...prevOrder, { 
             type: 'chat', 
-            content: 'Sorry, something went wrong. Please try again.' 
+            content: '抱歉，出了点问题。请重试。' 
           } as ChatData]);
         }
       } catch (error) {
@@ -229,7 +229,7 @@ export default function Home() {
         // Add error message
         setOrderedData(prevOrder => [...prevOrder, { 
           type: 'chat', 
-          content: 'Sorry, there was an error processing your request. Please try again.' 
+          content: '抱歉，处理您的请求时出错。请重试。' 
         } as ChatData]);
       } finally {
         setIsProcessingChat(false);
@@ -264,7 +264,7 @@ export default function Home() {
       });
       
       if (!response.ok) {
-        throw new Error(`Failed to get chat response: ${response.status}`);
+        throw new Error(`获取聊天响应失败: ${response.status}`);
       }
       
       const data = await response.json();
@@ -276,7 +276,7 @@ export default function Home() {
           // Show error message in results
           setOrderedData(prevOrder => [...prevOrder, { 
             type: 'chat', 
-            content: 'I apologize, but I couldn\'t generate a proper response. Please try asking your question again.' 
+            content: '抱歉，我无法生成正确的响应。请重新提问。' 
           }]);
         } else {
           // Add AI response to chat history asynchronously
@@ -304,7 +304,7 @@ export default function Home() {
         // Show error message
         setOrderedData(prevOrder => [...prevOrder, { 
           type: 'chat', 
-          content: 'Sorry, something went wrong. Please try again.' 
+          content: '抱歉，出了点问题。请重试。' 
         }]);
       }
     } catch (error) {
@@ -313,7 +313,7 @@ export default function Home() {
       // Add error message to display
       setOrderedData(prevOrder => [...prevOrder, { 
         type: 'chat', 
-        content: 'Sorry, there was an error processing your request. Please try again.' 
+        content: '抱歉，处理您的请求时出错。请重试。' 
       }]);
     } finally {
       setLoading(false);
@@ -335,12 +335,9 @@ export default function Home() {
     // For mobile, use a simplified approach without websockets
     if (isMobile) {
       try {
-        // Create a new unique ID for this research
-        const newResearchId = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-        
         // First save the initial question to history - with proper parameters
         const initialOrderedData: Data[] = [{ type: 'question', content: newQuestion } as QuestionData];
-        await saveResearch(
+        const newResearchId = await saveResearch(
           newQuestion,  // question
           '',           // empty answer initially
           initialOrderedData  // ordered data
@@ -359,7 +356,7 @@ export default function Home() {
         });
         
         if (!response.ok) {
-          throw new Error(`API error: ${response.status}`);
+          throw new Error(`API 错误: ${response.status}`);
         }
         
         const data = await response.json();
@@ -396,7 +393,7 @@ export default function Home() {
           // Handle error
           setOrderedData(prevOrder => [...prevOrder, { 
             type: 'chat', 
-            content: 'Sorry, I couldn\'t generate a research response. Please try again.' 
+            content: '抱歉，我无法生成研究响应。请重试。' 
           } as ChatData]);
         }
       } catch (error) {
@@ -404,7 +401,7 @@ export default function Home() {
         // Show error message
         setOrderedData(prevOrder => [...prevOrder, { 
           type: 'chat', 
-          content: 'Sorry, there was an error processing your request. Please try again.' 
+          content: '抱歉，处理您的请求时出错。请重试。' 
         } as ChatData]);
       } finally {
         setLoading(false);
@@ -460,14 +457,11 @@ export default function Home() {
     setOrderedData([{ type: 'question', content: newQuestion } as QuestionData]);
     
     try {
-      // Generate unique ID for this research
-      const mobileResearchId = `mobile-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
-      
       // Save initial research with just the question
       const initialOrderedData: Data[] = [{ type: 'question', content: newQuestion } as QuestionData];
       
       // Save to research history
-      await saveResearch(
+      const mobileResearchId = await saveResearch(
         newQuestion,  // question
         '',           // empty answer initially
         initialOrderedData  // ordered data
@@ -491,7 +485,7 @@ export default function Home() {
       });
       
       if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
+        throw new Error(`API 错误: ${response.status}`);
       }
       
       const data = await response.json();
@@ -534,7 +528,7 @@ export default function Home() {
           ...prevData, 
           { 
             type: 'chat', 
-            content: "I'm sorry, I couldn't generate a complete response. Please try rephrasing your question." 
+            content: "抱歉，我无法生成完整的响应。请尝试重新表述您的问题。" 
           } as ChatData
         ]);
       }
@@ -546,7 +540,7 @@ export default function Home() {
         ...prevData, 
         { 
           type: 'chat', 
-          content: "Sorry, there was an error processing your request. Please try again." 
+          content: "抱歉，处理您的请求时出错。请重试。" 
         } as ChatData
       ]);
     } finally {
@@ -592,7 +586,7 @@ export default function Home() {
       });
       
       if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
+          throw new Error(`API 错误: ${response.status}`);
       }
       
       const data = await response.json();
@@ -636,7 +630,7 @@ export default function Home() {
         // Show error message
         setOrderedData(prevOrder => [...prevOrder, { 
           type: 'chat', 
-          content: 'Sorry, something went wrong. Please try again.' 
+          content: '抱歉，出了点问题。请重试。' 
         } as ChatData]);
       }
     } catch (error) {
@@ -645,7 +639,7 @@ export default function Home() {
       // Add error message
       setOrderedData(prevOrder => [...prevOrder, { 
         type: 'chat', 
-        content: 'Sorry, there was an error processing your request. Please try again.' 
+        content: '抱歉，处理您的请求时出错。请重试。' 
       } as ChatData]);
     } finally {
       setIsProcessingChat(false);
@@ -723,10 +717,10 @@ export default function Home() {
     const url = `${window.location.origin}/research/${currentResearchId}`;
     navigator.clipboard.writeText(url)
       .then(() => {
-        toast.success("URL copied to clipboard!");
+        toast.success("URL 已复制到剪贴板！");
       })
       .catch(() => {
-        toast.error("Failed to copy URL");
+        toast.error("复制 URL 失败");
       });
   };
 

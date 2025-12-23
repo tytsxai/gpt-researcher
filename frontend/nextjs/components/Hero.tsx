@@ -110,13 +110,12 @@ const Hero: FC<THeroProps> = ({
         transition={{ duration: 0.8 }}
         className="flex flex-col items-center justify-center w-full py-6 sm:py-8 md:py-16 lg:pt-10 lg:pb-20"
       >
-        {/* Header text */}
-        <motion.h1 
+        <motion.h1
           variants={fadeInUp}
           transition={{ duration: 0.8, delay: 0.1 }}
           className="text-2xl sm:text-3xl md:text-4xl font-medium text-center text-white mb-8 sm:mb-10 md:mb-12 px-4"
         >
-          What would you like to research next?
+          您想研究什么？
         </motion.h1>
 
         {/* Input section with enhanced styling */}
@@ -143,7 +142,7 @@ const Hero: FC<THeroProps> = ({
             className="mt-6 text-center px-4"
           >
             <p className="text-gray-400 text-sm font-light">
-              GPT Researcher may make mistakes. Verify important information and check sources.
+              GPT Researcher 可能产生错误。请验证重要信息并检查来源。
             </p>
           </motion.div>
         </motion.div>
@@ -266,17 +265,17 @@ type suggestionType = {
 const suggestions: suggestionType[] = [
   {
     id: 1,
-    name: "Stock analysis on ",
+    name: "股票分析：",
     icon: "/img/stock2.svg",
   },
   {
     id: 2,
-    name: "Help me plan an adventure to ",
+    name: "帮我规划一次去",
     icon: "/img/hiker.svg",
   },
   {
     id: 3,
-    name: "What are the latest news on ",
+    name: "最新新闻：",
     icon: "/img/news.svg",
   },
 ];
