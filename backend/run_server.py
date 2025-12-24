@@ -23,13 +23,23 @@ if __name__ == "__main__":
     # Change to backend directory
     os.chdir(backend_dir)
     
+    def _env_truthy(name: str, default: bool = False) -> bool:
+        value = os.getenv(name)
+        if value is None:
+            return default
+        return value.strip().lower() in {"1", "true", "yes", "on"}
+
+    host = os.getenv("HOST", "0.0.0.0")
+    port = int(os.getenv("PORT", "8000"))
+    reload = _env_truthy("RELOAD", False)
+    log_level = os.getenv("LOG_LEVEL", os.getenv("LOGGING_LEVEL", "info")).lower()
+
     # Start the server
     uvicorn.run(
         "server.app:app",
-        host="0.0.0.0", 
-        port=8000, 
-        reload=True,
-        log_level="info"
+        host=host,
+        port=port,
+        reload=reload,
+        log_level=log_level,
     )
-
 

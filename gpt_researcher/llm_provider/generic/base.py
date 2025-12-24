@@ -297,6 +297,10 @@ class GenericLLMProvider:
 
 def _check_pkg(pkg: str) -> None:
     if not importlib.util.find_spec(pkg):
+        if os.getenv("DISABLE_RUNTIME_PIP", "").strip().lower() in {"1", "true", "yes", "on"}:
+            raise ImportError(
+                f"无法导入 {pkg}. 运行时安装已被禁用（DISABLE_RUNTIME_PIP=true）。"
+            )
         pkg_kebab = pkg.replace("_", "-")
         # 导入并初始化 colorama
         init(autoreset=True)
