@@ -196,6 +196,10 @@ GPT Researcher now includes Deep Research - an advanced recursive research workf
 docker-compose up --build
 ```
 
+## Production readiness
+
+See `docs/ops/production-readiness.md` for a minimal production checklist (health/readiness, security, logging, backups, and rollback guidance).
+
 If that doesn't work, try running it without the dash:
 ```bash
 docker compose up --build
