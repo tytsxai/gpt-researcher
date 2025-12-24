@@ -480,6 +480,8 @@ async def websocket_endpoint(websocket: WebSocket):
             auth_header = websocket.headers.get("authorization", "")
             if auth_header.startswith("Bearer "):
                 provided = auth_header[7:]
+        if not provided:
+            provided = websocket.query_params.get("api_key")
         if provided != expected_key:
             await websocket.close(code=1008)
             return

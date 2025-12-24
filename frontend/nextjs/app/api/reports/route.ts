@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 
 export async function GET(request: Request) {
   const backendUrl = process.env.NEXT_PUBLIC_GPTR_API_URL || 'http://localhost:8000';
+  const apiKey = process.env.GPTR_API_KEY;
+  const authHeaders = apiKey ? { 'X-API-Key': apiKey } : {};
   
   try {
     const { searchParams, pathname } = new URL(request.url);
@@ -32,7 +34,9 @@ export async function GET(request: Request) {
     
     console.log(`GET ${endpoint} - Proxying request to backend`);
     
-    const response = await fetch(`${backendUrl}${endpoint}`);
+    const response = await fetch(`${backendUrl}${endpoint}`, {
+      headers: authHeaders,
+    });
     
     if (!response.ok) {
       // Handle backend errors
@@ -65,6 +69,8 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   const backendUrl = process.env.NEXT_PUBLIC_GPTR_API_URL || 'http://localhost:8000';
+  const apiKey = process.env.GPTR_API_KEY;
+  const authHeaders = apiKey ? { 'X-API-Key': apiKey } : {};
   
   try {
     // Parse the request body
@@ -85,6 +91,7 @@ export async function POST(request: Request) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        ...authHeaders,
       },
       body: JSON.stringify(body),
     });

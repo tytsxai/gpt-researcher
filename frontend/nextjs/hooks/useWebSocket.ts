@@ -60,7 +60,10 @@ export const useWebSocket = (
       let fullHost = getHost()
       const protocol = fullHost.includes('https') ? 'wss:' : 'ws:'
       const cleanHost = fullHost.replace('http://', '').replace('https://', '')
-      const ws_uri = `${protocol}//${cleanHost}/ws`
+      const wsApiKey = process.env.NEXT_PUBLIC_GPTR_WS_API_KEY
+      const ws_uri = wsApiKey
+        ? `${protocol}//${cleanHost}/ws?api_key=${encodeURIComponent(wsApiKey)}`
+        : `${protocol}//${cleanHost}/ws`
 
       console.log(`Creating new WebSocket connection to ${ws_uri}`);
       const newSocket = new WebSocket(ws_uri);

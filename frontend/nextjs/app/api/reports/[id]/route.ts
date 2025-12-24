@@ -6,11 +6,15 @@ export async function GET(
 ) {
   const { id } = params;
   const backendUrl = process.env.NEXT_PUBLIC_GPTR_API_URL || 'http://localhost:8000';
+  const apiKey = process.env.GPTR_API_KEY;
+  const authHeaders = apiKey ? { 'X-API-Key': apiKey } : {};
   
   try {
     console.log(`GET /api/reports/${id} - Proxying request to backend`);
     
-    const response = await fetch(`${backendUrl}/api/reports/${id}`);
+    const response = await fetch(`${backendUrl}/api/reports/${id}`, {
+      headers: authHeaders,
+    });
     
     if (!response.ok) {
       // Handle backend errors
@@ -38,12 +42,15 @@ export async function DELETE(
 ) {
   const { id } = params;
   const backendUrl = process.env.NEXT_PUBLIC_GPTR_API_URL || 'http://localhost:8000';
+  const apiKey = process.env.GPTR_API_KEY;
+  const authHeaders = apiKey ? { 'X-API-Key': apiKey } : {};
   
   try {
     console.log(`DELETE /api/reports/${id} - Proxying request to backend`);
     
     const response = await fetch(`${backendUrl}/api/reports/${id}`, {
       method: 'DELETE',
+      headers: authHeaders,
     });
     
     if (!response.ok && response.status !== 404) {
@@ -71,6 +78,8 @@ export async function PUT(
 ) {
   const { id } = params;
   const backendUrl = process.env.NEXT_PUBLIC_GPTR_API_URL || 'http://localhost:8000';
+  const apiKey = process.env.GPTR_API_KEY;
+  const authHeaders = apiKey ? { 'X-API-Key': apiKey } : {};
   
   try {
     // Parse the request body
@@ -91,6 +100,7 @@ export async function PUT(
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
+        ...authHeaders,
       },
       body: JSON.stringify(body),
     });

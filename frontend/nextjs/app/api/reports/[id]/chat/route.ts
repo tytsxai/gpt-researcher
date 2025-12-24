@@ -6,6 +6,8 @@ export async function GET(
 ) {
   const { id } = params;
   const backendUrl = process.env.NEXT_PUBLIC_GPTR_API_URL || 'http://localhost:8000';
+  const apiKey = process.env.GPTR_API_KEY;
+  const authHeaders = apiKey ? { 'X-API-Key': apiKey } : {};
   
   try {
     if (!id) {
@@ -17,7 +19,9 @@ export async function GET(
     
     console.log(`GET /api/reports/${id}/chat - Proxying request to backend`);
     
-    const response = await fetch(`${backendUrl}/api/reports/${id}/chat`);
+    const response = await fetch(`${backendUrl}/api/reports/${id}/chat`, {
+      headers: authHeaders,
+    });
     const data = await response.json();
     
     return NextResponse.json(data, { status: response.status });
@@ -36,6 +40,8 @@ export async function POST(
 ) {
   const { id } = params;
   const backendUrl = process.env.NEXT_PUBLIC_GPTR_API_URL || 'http://localhost:8000';
+  const apiKey = process.env.GPTR_API_KEY;
+  const authHeaders = apiKey ? { 'X-API-Key': apiKey } : {};
   
   try {
     if (!id) {
@@ -63,6 +69,7 @@ export async function POST(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        ...authHeaders,
       },
       body: JSON.stringify(body),
     });
