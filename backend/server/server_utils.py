@@ -213,10 +213,25 @@ def update_environment_variables(config: Dict[str, str]):
         os.environ[key] = value
 
 
-async def handle_file_upload(file, DOC_PATH: str) -> Dict[str, str]:
+async def handle_file_upload(file, DOC_PATH: str, max_bytes: int | None = None) -> Dict[str, str]:
+    os.makedirs(DOC_PATH, exist_ok=True)
     file_path = os.path.join(DOC_PATH, os.path.basename(file.filename))
+    size = 0
+    chunk_size = 1024 * 1024
+
     with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+        while True:
+            chunk = await file.read(chunk_size)
+            if not chunk:
+                break
+            size += len(chunk)
+            if max_bytes and size > max_bytes:
+                buffer.close()
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+                raise HTTPException(status_code=413, detail="Uploaded file is too large")
+            buffer.write(chunk)
+
     print(f"File uploaded to {file_path}")
 
     document_loader = DocumentLoader(DOC_PATH)
