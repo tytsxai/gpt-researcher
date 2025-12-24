@@ -19,6 +19,7 @@ Use health endpoints:
 - Set `API_KEY` to protect write/expensive endpoints.
 - Set `CORS_ALLOW_ORIGINS` to the exact frontend domain(s). Avoid `*` in production.
 - Use a reverse proxy (nginx/traefik) for TLS and rate limiting.
+- If your browser UI uses WebSockets and `API_KEY` is enabled, supply `NEXT_PUBLIC_GPTR_WS_API_KEY` (exposes the key) **or** terminate auth at a reverse proxy that injects the header.
 
 ## 3) Logging & observability
 - Logs are emitted to stdout and rotated files (`logs/app.log`).
@@ -35,10 +36,15 @@ Use health endpoints:
 - Use a persistent volume and periodic snapshots.
 - For regulated environments, add lifecycle policies to delete old outputs/logs.
 
+Backup scripts:
+- `scripts/backup_data.sh` (creates `backups/gptr_backup_<timestamp>.tar.gz`)
+- `scripts/restore_data.sh /path/to/backup.tar.gz`
+
 ## 5) Deployment & rollback
 - Prefer immutable images and explicit tags.
 - Keep the previous image tag available for fast rollback.
 - Use `STRICT_ENV=true` and `/readyz` in your deployment health checks.
+- For Docker Compose production usage, see `docker-compose.prod.yml`.
 
 ## 6) Runtime safety knobs
 - `MAX_UPLOAD_MB` to cap uploads.
@@ -52,4 +58,3 @@ Use health endpoints:
   - `GET /readyz` -> ready: true
   - create a report and download output
   - logs are present in stdout or rotated files
-

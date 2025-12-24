@@ -48,6 +48,9 @@ logs/
 *.log
 server_log.txt
 
+# Backups
+backups/
+
 #Cursor Rules
 .cursorrules
 CURSOR_RULES.md

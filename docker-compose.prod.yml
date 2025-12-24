@@ -1,0 +1,50 @@
+services:
+  gpt-researcher:
+    image: gptresearcher/gpt-researcher
+    build: ./
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL}
+      TAVILY_API_KEY: ${TAVILY_API_KEY}
+      LANGCHAIN_API_KEY: ${LANGCHAIN_API_KEY}
+      API_KEY: ${API_KEY}
+      DOC_PATH: ${DOC_PATH:-./my-docs}
+      STRICT_ENV: ${STRICT_ENV:-true}
+      REQUIRED_ENV: ${REQUIRED_ENV}
+      CORS_ALLOW_ORIGINS: ${CORS_ALLOW_ORIGINS}
+      CORS_ALLOW_CREDENTIALS: ${CORS_ALLOW_CREDENTIALS:-false}
+      REQUEST_LOGGING: ${REQUEST_LOGGING:-true}
+      LOGGING_LEVEL: ${LOGGING_LEVEL:-INFO}
+      LOG_TO_FILE: ${LOG_TO_FILE:-true}
+      LOG_FILE_MAX_BYTES: ${LOG_FILE_MAX_BYTES:-10485760}
+      LOG_FILE_BACKUP_COUNT: ${LOG_FILE_BACKUP_COUNT:-5}
+      DISABLE_RUNTIME_PIP: ${DISABLE_RUNTIME_PIP:-true}
+      MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-25}
+    volumes:
+      - ${PWD}/my-docs:/usr/src/app/my-docs:rw
+      - ${PWD}/outputs:/usr/src/app/outputs:rw
+      - ${PWD}/logs:/usr/src/app/logs:rw
+    restart: unless-stopped
+    ports:
+      - 8000:8000
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/healthz').read()"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  gptr-nextjs:
+    image: gptresearcher/gptr-nextjs
+    build:
+      context: frontend/nextjs
+      dockerfile: Dockerfile
+    environment:
+      NEXT_PUBLIC_GA_MEASUREMENT_ID: ${NEXT_PUBLIC_GA_MEASUREMENT_ID}
+      NEXT_PUBLIC_GPTR_API_URL: ${NEXT_PUBLIC_GPTR_API_URL:-http://localhost:8000}
+      GPTR_API_KEY: ${GPTR_API_KEY}
+      NEXT_PUBLIC_GPTR_WS_API_KEY: ${NEXT_PUBLIC_GPTR_WS_API_KEY}
+    restart: unless-stopped
+    ports:
+      - 3000:3000
+    depends_on:
+      - gpt-researcher
