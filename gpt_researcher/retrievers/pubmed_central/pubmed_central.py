@@ -2,6 +2,7 @@ from typing import List, Dict, Any, Optional
 import os
 import xml.etree.ElementTree as ET
 import requests
+from typing import Any, Dict, List, Optional
 
 
 class PubMedCentralSearch:
@@ -58,7 +59,7 @@ class PubMedCentralSearch:
         }
         
         try:
-            response = requests.get(self.base_search_url, params=search_params)
+            response = requests.get(self.base_search_url, params=search_params, timeout=10)
             response.raise_for_status()
             data = response.json()
             
@@ -83,7 +84,7 @@ class PubMedCentralSearch:
         }
         
         try:
-            response = requests.get(self.base_fetch_url, params=fetch_params)
+            response = requests.get(self.base_fetch_url, params=fetch_params, timeout=10)
             response.raise_for_status()
             
             # 解析 XML 内容

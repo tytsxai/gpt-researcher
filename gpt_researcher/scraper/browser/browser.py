@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import traceback
-import pickle
+import json
 from pathlib import Path
 from sys import platform
 import time
@@ -33,7 +33,7 @@ class BrowserScraper:
         self.driver = None
         self.use_browser_cookies = False
         self._import_selenium()  # Import only if used to avoid unnecessary dependencies
-        self.cookie_filename = f"{self._generate_random_string(8)}.pkl"
+        self.cookie_filename = f"{self._generate_random_string(8)}.json"
 
     def scrape(self) -> tuple:
         if not self.url:
@@ -122,9 +122,17 @@ class BrowserScraper:
         """Load saved cookies before visiting the target URL"""
         cookie_file = Path(self.cookie_filename)
         if cookie_file.exists():
-            cookies = pickle.load(open(self.cookie_filename, "rb"))
-            for cookie in cookies:
-                self.driver.add_cookie(cookie)
+            try:
+                with open(self.cookie_filename, "r", encoding="utf-8") as handle:
+                    cookies = json.load(handle)
+            except json.JSONDecodeError:
+                print("Cookie 文件格式不受支持（可能是旧版 pickle）。请删除该文件后重试。")
+                return
+
+            if isinstance(cookies, list):
+                for cookie in cookies:
+                    if isinstance(cookie, dict):
+                        self.driver.add_cookie(cookie)
         else:
             print("未找到保存的 cookies。")
 
@@ -180,7 +188,8 @@ class BrowserScraper:
 
             # Save cookies to a file
             cookies = self.driver.get_cookies()
-            pickle.dump(cookies, open(self.cookie_filename, "wb"))
+            with open(self.cookie_filename, "w", encoding="utf-8") as handle:
+                json.dump(cookies, handle)
 
             # print("Google cookies saved successfully.")
         except Exception as e:

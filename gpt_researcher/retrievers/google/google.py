@@ -3,7 +3,6 @@
 # libraries
 import os
 import requests
-import json
 
 
 class GoogleSearch:
@@ -64,20 +63,21 @@ class GoogleSearch:
 
         print("正在使用查询 {0} 进行搜索...".format(search_query))
 
-        url = f"https://www.googleapis.com/customsearch/v1?key={self.api_key}&cx={self.cx_key}&q={search_query}&start=1"
-        resp = requests.get(url)
+        params = {
+            "key": self.api_key,
+            "cx": self.cx_key,
+            "q": search_query,
+            "start": 1,
+        }
 
-        if resp.status_code < 200 or resp.status_code >= 300:
-            print("Google 搜索：意外的响应状态：", resp.status_code)
-
-        if resp is None:
-            return
         try:
-            search_results = json.loads(resp.text)
-        except Exception:
-            return
-        if search_results is None:
-            return
+            resp = requests.get("https://www.googleapis.com/customsearch/v1", params=params, timeout=10)
+            if resp.status_code < 200 or resp.status_code >= 300:
+                print("Google 搜索：意外的响应状态：", resp.status_code)
+            search_results = resp.json()
+        except Exception as e:
+            print(f"Google 搜索失败：{e}")
+            return []
 
         results = search_results.get("items", [])
         search_results = []
