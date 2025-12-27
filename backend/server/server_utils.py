@@ -5,6 +5,8 @@ import re
 import time
 import shutil
 import traceback
+import inspect
+import unicodedata
 from typing import Awaitable, Dict, List, Any
 from fastapi.responses import JSONResponse, FileResponse
 from gpt_researcher.document.document import DocumentLoader
@@ -116,6 +118,83 @@ def sanitize_filename(filename: str) -> str:
     return re.sub(r"[^\w\s-]", "", sanitized).strip()
 
 
+_WINDOWS_RESERVED_NAMES = {
+    "con",
+    "prn",
+    "aux",
+    "nul",
+    *(f"com{i}" for i in range(1, 10)),
+    *(f"lpt{i}" for i in range(1, 10)),
+}
+
+_BIDI_CONTROL_CHARS = {
+    "\u200e",  # LRM
+    "\u200f",  # RLM
+    "\u202a",  # LRE
+    "\u202b",  # RLE
+    "\u202c",  # PDF
+    "\u202d",  # LRO
+    "\u202e",  # RLO
+    "\u2066",  # LRI
+    "\u2067",  # RLI
+    "\u2068",  # FSI
+    "\u2069",  # PDI
+}
+
+
+def secure_filename(filename: str) -> str:
+    if filename is None:
+        raise ValueError("empty filename")
+
+    name = str(filename)
+    name = unicodedata.normalize("NFKC", name)
+
+    # Remove null bytes and ASCII control characters
+    name = "".join(ch for ch in name if ch != "\x00" and 32 <= ord(ch) != 127)
+    name = "".join(ch for ch in name if ch not in _BIDI_CONTROL_CHARS)
+    name = name.strip()
+    if not name or all(ch in {".", " "} for ch in name):
+        raise ValueError("empty filename")
+
+    # Strip Windows drive letters (e.g. C:foo.txt)
+    name = re.sub(r"^[A-Za-z]:", "", name)
+
+    # Reject explicit traversal segments
+    if any(part == ".." for part in re.split(r"[\\/]+", name)):
+        raise ValueError("path traversal")
+
+    # Remove path separators entirely
+    name = name.replace("/", "").replace("\\", "")
+
+    # Remove leading dots/spaces
+    name = name.lstrip(" .")
+    if not name or all(ch == "." for ch in name):
+        raise ValueError("empty filename")
+
+    # Keep a conservative set of filename characters
+    name = re.sub(r"[^A-Za-z0-9._-]", "", name)
+    name = name.lstrip(" .")
+    if not name:
+        raise ValueError("empty filename")
+
+    if len(name.encode("utf-8")) > 255:
+        raise ValueError("filename too long")
+
+    stem = os.path.splitext(name)[0].lower()
+    if stem in _WINDOWS_RESERVED_NAMES:
+        raise ValueError("reserved name")
+
+    return name
+
+
+def validate_file_path(file_path: str, base_dir: str) -> str:
+    base = os.path.realpath(base_dir)
+    target = os.path.realpath(file_path)
+    if target != base and not target.startswith(base + os.sep):
+        raise ValueError("outside allowed directory")
+    return os.path.abspath(file_path)
+
+
 async def handle_start_command(websocket, data: str, manager):
     json_data = json.loads(data[6:])
     (
@@ -215,13 +294,44 @@ def update_environment_variables(config: Dict[str, str]):
 
 async def handle_file_upload(file, DOC_PATH: str, max_bytes: int | None = None) -> Dict[str, str]:
     os.makedirs(DOC_PATH, exist_ok=True)
-    file_path = os.path.join(DOC_PATH, os.path.basename(file.filename))
+
+    try:
+        safe_name = secure_filename(getattr(file, "filename", ""))
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"Invalid file: {e}")
+
+    base, ext = os.path.splitext(safe_name)
+    candidate_name = safe_name
+    counter = 1
+    while os.path.exists(os.path.join(DOC_PATH, candidate_name)):
+        candidate_name = f"{base}_{counter}{ext}"
+        counter += 1
+
+    file_path = validate_file_path(os.path.join(DOC_PATH, candidate_name), DOC_PATH)
     size = 0
     chunk_size = 1024 * 1024
 
+    def _coerce_bytes(value) -> bytes:
+        if isinstance(value, (bytes, bytearray)):
+            return bytes(value)
+        return b""
+
+    async def _read_chunk() -> bytes:
+        if hasattr(file, "read"):
+            try:
+                chunk = file.read(chunk_size)
+                if inspect.isawaitable(chunk):
+                    return _coerce_bytes(await chunk)
+                return _coerce_bytes(chunk)
+            except TypeError:
+                pass
+        if hasattr(file, "file") and hasattr(file.file, "read"):
+            return _coerce_bytes(file.file.read(chunk_size))
+        return b""
+
     with open(file_path, "wb") as buffer:
         while True:
-            chunk = await file.read(chunk_size)
+            chunk = await _read_chunk()
             if not chunk:
                 break
             size += len(chunk)
@@ -237,11 +347,23 @@ async def handle_file_upload(file, DOC_PATH: str, max_bytes: int | None = None) 
     document_loader = DocumentLoader(DOC_PATH)
     await document_loader.load()
 
-    return {"filename": file.filename, "path": file_path}
+    return {"filename": candidate_name, "path": file_path}
 
 
 async def handle_file_deletion(filename: str, DOC_PATH: str) -> JSONResponse:
-    file_path = os.path.join(DOC_PATH, os.path.basename(filename))
+    try:
+        safe_name = secure_filename(filename)
+    except ValueError as e:
+        return JSONResponse(status_code=400, content={"message": f"Invalid file: {e}"})
+
+    try:
+        file_path = validate_file_path(os.path.join(DOC_PATH, safe_name), DOC_PATH)
+    except ValueError as e:
+        return JSONResponse(status_code=400, content={"message": str(e)})
+
+    if os.path.exists(file_path) and not os.path.isfile(file_path):
+        return JSONResponse(status_code=400, content={"message": "Target is not a file"})
+
     if os.path.exists(file_path):
         os.remove(file_path)
         print(f"File deleted: {file_path}")

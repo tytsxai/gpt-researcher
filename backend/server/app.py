@@ -8,6 +8,7 @@ import warnings
 import uuid
 from datetime import datetime, timezone
 import tempfile
+from pathlib import Path
 
 # Suppress Pydantic V2 migration warnings
 warnings.filterwarnings("ignore", message="Valid config keys have changed in V2")
@@ -48,6 +49,8 @@ logger.propagate = True
 logging.getLogger("uvicorn.supervisors.ChangeReload").setLevel(logging.WARNING)
 
 START_TIME = time.time()
+OUTPUTS_DIR = Path("outputs").resolve()
+ALLOWED_OUTPUT_EXTS = {".pdf", ".docx", ".md", ".json"}
 
 def _env_truthy(name: str, default: bool = False) -> bool:
     value = os.getenv(name)
@@ -85,6 +88,29 @@ def require_api_key(request: Request) -> None:
             provided = auth_header[7:]
     if provided != expected:
         raise HTTPException(status_code=401, detail="Unauthorized")
+
+def _safe_output_file_path(filename: str) -> Path:
+    if not filename or len(filename) > 255:
+        raise HTTPException(status_code=404, detail="Not found")
+
+    if "\x00" in filename or "/" in filename or "\\" in filename:
+        raise HTTPException(status_code=404, detail="Not found")
+
+    if Path(filename).name != filename:
+        raise HTTPException(status_code=404, detail="Not found")
+
+    suffix = Path(filename).suffix.lower()
+    if suffix not in ALLOWED_OUTPUT_EXTS:
+        raise HTTPException(status_code=404, detail="Not found")
+
+    candidate = (OUTPUTS_DIR / filename).resolve()
+    if OUTPUTS_DIR not in candidate.parents:
+        raise HTTPException(status_code=404, detail="Not found")
+
+    if not candidate.exists() or not candidate.is_file():
+        raise HTTPException(status_code=404, detail="Not found")
+
+    return candidate
 
 def _get_runtime_retrievers() -> List[str]:
     retriever_env = os.getenv("RETRIEVER") or DEFAULT_CONFIG.get("RETRIEVER", "tavily")
@@ -211,7 +237,7 @@ async def lifespan(app: FastAPI):
     os.makedirs("outputs", exist_ok=True)
     os.makedirs("logs", exist_ok=True)
     os.makedirs(DOC_PATH, exist_ok=True)
-    app.mount("/outputs", StaticFiles(directory="outputs"), name="outputs")
+    # Avoid mounting outputs as a static directory; serve files via an authenticated route.
     
     # Mount frontend static files
     frontend_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "frontend")
@@ -348,10 +374,13 @@ async def serve_frontend():
 
 @app.get("/report/{research_id}")
 async def read_report(request: Request, research_id: str, _: None = Depends(require_api_key)):
-    docx_path = os.path.join('outputs', f"{research_id}.docx")
-    if not os.path.exists(docx_path):
-        return {"message": "未找到报告。"}
-    return FileResponse(docx_path)
+    docx_path = _safe_output_file_path(f"{research_id}.docx")
+    return FileResponse(str(docx_path))
+
+@app.get("/outputs/{filename}")
+async def get_output_file(filename: str, _: None = Depends(require_api_key)):
+    file_path = _safe_output_file_path(filename)
+    return FileResponse(str(file_path))
 
 
 # Simplified API routes - no database persistence
@@ -480,7 +509,7 @@ async def websocket_endpoint(websocket: WebSocket):
             auth_header = websocket.headers.get("authorization", "")
             if auth_header.startswith("Bearer "):
                 provided = auth_header[7:]
-        if not provided:
+        if not provided and _env_truthy("ALLOW_WS_API_KEY_QUERY", False):
             provided = websocket.query_params.get("api_key")
         if provided != expected_key:
             await websocket.close(code=1008)
