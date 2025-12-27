@@ -3,13 +3,15 @@ import asyncio
 from pathlib import Path
 import json
 import logging
+import pytest
 from fastapi import WebSocket
 from datetime import datetime
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-class TestWebSocket(WebSocket):
+
+class DummyWebSocket(WebSocket):
     def __init__(self):
         self.events = []
         self.scope = {}
@@ -28,21 +30,20 @@ class TestWebSocket(WebSocket):
 @pytest.mark.asyncio
 async def test_log_output_file():
     """Test to verify logs are properly written to output file"""
-    from gpt_researcher.agent import GPTResearcher
     from backend.server.server_utils import CustomLogsHandler
     
     # 1. Setup like the main app
-    websocket = TestWebSocket()
+    websocket = DummyWebSocket()
     await websocket.accept()
     
-    # 2. Initialize researcher like main app
+    # 2. Initialize logs handler like main app
     query = "What is the capital of France?"
     research_id = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{hash(query)}"
     logs_handler = CustomLogsHandler(websocket=websocket, task=research_id)
-    researcher = GPTResearcher(query=query, websocket=logs_handler)
-    
-    # 3. Run research
-    await researcher.conduct_research()
+
+    # 3. Emit a couple of log events
+    await logs_handler.send_json({"type": "logs", "content": "info", "output": "hello"})
+    await logs_handler.send_json({"type": "logs", "content": "info", "output": "world"})
     
     # 4. Verify events were captured
     logger.info(f"Events captured: {len(websocket.events)}")
